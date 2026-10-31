@@ -142,7 +142,9 @@ class VisionPipelineService:
         self,
         rgb_frame: np.ndarray,
         frame_idx: int,
-        timestamp_ms: float
+        timestamp_ms: float,
+        detect_pose: bool = True,
+        detect_face: bool = True
     ) -> FrameLandmarks:
         """
         Executes real MediaPipe Tasks on an RGB image frame.
@@ -211,65 +213,70 @@ class VisionPipelineService:
         if "right" not in detected_handedness_labels:
             missing_elements.append("right_hand")
 
-        # 2. Pose Detection
-        pose_detector = self._get_pose_landmarker()
-        if pose_detector:
-            try:
-                pose_res = pose_detector.detect(mp_image)
-                if pose_res and pose_res.pose_landmarks and len(pose_res.pose_landmarks) > 0:
-                    pose_pts = [
-                        LandmarkPoint3D(
-                            x=round(float(lm.x), 5),
-                            y=round(float(lm.y), 5),
-                            z=round(float(lm.z), 5),
-                            visibility=round(float(getattr(lm, "visibility", 1.0)), 3) if getattr(lm, "visibility", None) is not None else None,
-                            presence=round(float(getattr(lm, "presence", 1.0)), 3) if getattr(lm, "presence", None) is not None else None
-                        )
-                        for lm in pose_res.pose_landmarks[0]
-                    ]
-                    # Estimate confidence from mean landmark visibility
-                    vis_scores = [p.visibility for p in pose_pts if p.visibility is not None]
-                    mean_vis = round(float(np.mean(vis_scores)), 3) if vis_scores else 0.85
-
-                    pose_detection = PoseDetection(
-                        confidence=mean_vis,
-                        landmarks=pose_pts
-                    )
-                else:
-                    missing_elements.append("pose")
-            except Exception as e:
-                print(f"[VisionPipeline] Pose detection exception on frame {frame_idx}: {e}")
-                missing_elements.append("pose")
-        else:
-            missing_elements.append("pose")
-
-        # 3. Face Detection (Sign Language Non-Manual Markers)
-        face_detector = self._get_face_landmarker()
-        if face_detector:
-            try:
-                face_res = face_detector.detect(mp_image)
-                if face_res and face_res.face_landmarks and len(face_res.face_landmarks) > 0:
-                    raw_face = face_res.face_landmarks[0]
-                    salient_pts = []
-                    for idx in SIGN_FACIAL_INDICES:
-                        if idx < len(raw_face):
-                            lm = raw_face[idx]
-                            salient_pts.append(LandmarkPoint3D(
+        # 2. Pose Detection (Optional for high-speed live gesture mode)
+        if detect_pose:
+            pose_detector = self._get_pose_landmarker()
+            if pose_detector:
+                try:
+                    pose_res = pose_detector.detect(mp_image)
+                    if pose_res and pose_res.pose_landmarks and len(pose_res.pose_landmarks) > 0:
+                        pose_pts = [
+                            LandmarkPoint3D(
                                 x=round(float(lm.x), 5),
                                 y=round(float(lm.y), 5),
-                                z=round(float(lm.z), 5)
-                            ))
-                    face_detection = FaceDetection(
-                        confidence=0.90,
-                        landmarks=salient_pts
-                    )
-                else:
+                                z=round(float(lm.z), 5),
+                                visibility=round(float(getattr(lm, "visibility", 1.0)), 3) if getattr(lm, "visibility", None) is not None else None,
+                                presence=round(float(getattr(lm, "presence", 1.0)), 3) if getattr(lm, "presence", None) is not None else None
+                            )
+                            for lm in pose_res.pose_landmarks[0]
+                        ]
+                        vis_scores = [p.visibility for p in pose_pts if p.visibility is not None]
+                        mean_vis = round(float(np.mean(vis_scores)), 3) if vis_scores else 0.85
+
+                        pose_detection = PoseDetection(
+                            confidence=mean_vis,
+                            landmarks=pose_pts
+                        )
+                    else:
+                        missing_elements.append("pose")
+                except Exception as e:
+                    print(f"[VisionPipeline] Pose detection exception on frame {frame_idx}: {e}")
+                    missing_elements.append("pose")
+            else:
+                missing_elements.append("pose")
+        else:
+            missing_elements.append("pose_disabled_for_speed")
+
+        # 3. Face Detection (Optional for high-speed live gesture mode)
+        if detect_face:
+            face_detector = self._get_face_landmarker()
+            if face_detector:
+                try:
+                    face_res = face_detector.detect(mp_image)
+                    if face_res and face_res.face_landmarks and len(face_res.face_landmarks) > 0:
+                        raw_face = face_res.face_landmarks[0]
+                        salient_pts = []
+                        for idx in SIGN_FACIAL_INDICES:
+                            if idx < len(raw_face):
+                                lm = raw_face[idx]
+                                salient_pts.append(LandmarkPoint3D(
+                                    x=round(float(lm.x), 5),
+                                    y=round(float(lm.y), 5),
+                                    z=round(float(lm.z), 5)
+                                ))
+                        face_detection = FaceDetection(
+                            confidence=0.90,
+                            landmarks=salient_pts
+                        )
+                    else:
+                        missing_elements.append("face")
+                except Exception as e:
+                    print(f"[VisionPipeline] Face detection exception on frame {frame_idx}: {e}")
                     missing_elements.append("face")
-            except Exception as e:
-                print(f"[VisionPipeline] Face detection exception on frame {frame_idx}: {e}")
+            else:
                 missing_elements.append("face")
         else:
-            missing_elements.append("face")
+            missing_elements.append("face_disabled_for_speed")
 
         # Determine overall frame detection status
         has_hands = len(hands_list) > 0

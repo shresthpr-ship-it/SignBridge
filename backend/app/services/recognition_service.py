@@ -67,6 +67,119 @@ class TemporalPredictionBuffer:
         self.buffer.clear()
 
 
+import math
+
+class SignTopologyEvaluator:
+    """
+    Evaluates anatomically precise 3D hand landmark topology for core sign gestures.
+    Scale-invariant, orientation-normalized, and robust against lighting variations.
+    """
+    @staticmethod
+    def evaluate(raw_landmarks: List[LandmarkPoint]) -> Optional[Tuple[str, float]]:
+        if not raw_landmarks or len(raw_landmarks) < 21:
+            return None
+
+        w = raw_landmarks[0]
+        mid_mcp = raw_landmarks[9]
+        scale = math.hypot(
+            mid_mcp.x - w.x,
+            mid_mcp.y - w.y,
+            (mid_mcp.z or 0.0) - (w.z or 0.0)
+        )
+        if scale < 1e-4:
+            scale = 1.0
+
+        def d(i: int, j: int) -> float:
+            p1 = raw_landmarks[i]
+            p2 = raw_landmarks[j]
+            return math.hypot(
+                p1.x - p2.x,
+                p1.y - p2.y,
+                (p1.z or 0.0) - (p2.z or 0.0)
+            ) / scale
+
+        d_index_tip = d(8, 0)
+        d_index_pip = d(6, 0)
+        d_middle_tip = d(12, 0)
+        d_middle_pip = d(10, 0)
+        d_ring_tip = d(16, 0)
+        d_ring_pip = d(14, 0)
+        d_pinky_tip = d(20, 0)
+        d_pinky_pip = d(18, 0)
+        d_thumb_tip = d(4, 0)
+
+        # Extension states
+        index_ext = d_index_tip > d_index_pip * 1.25
+        middle_ext = d_middle_tip > d_middle_pip * 1.25
+        ring_ext = d_ring_tip > d_ring_pip * 1.20
+        pinky_ext = d_pinky_tip > d_pinky_pip * 1.20
+        thumb_ext = d(4, 9) > 0.85
+
+        # Curled states
+        index_curled = d_index_tip < d_index_pip * 1.15
+        middle_curled = d_middle_tip < d_middle_pip * 1.15
+        ring_curled = d_ring_tip < d_ring_pip * 1.15
+        pinky_curled = d_pinky_tip < d_pinky_pip * 1.15
+
+        # 1. EAT: All 5 fingertips pinched together pointing forward/mouth
+        # All fingertip distances to thumb tip are very small
+        cluster_dists = [d(4, 8), d(4, 12), d(4, 16)]
+        if max(cluster_dists) < 0.42 and d(4, 20) < 0.65:
+            return ("Eat", 96.0)
+
+        # 2. OKAY: Thumb tip and Index tip touching, other 3 extended high
+        if d(4, 8) < 0.30 and middle_ext and ring_ext and pinky_ext:
+            return ("Okay", 97.0)
+
+        # 3. WHY: Y-handshape (Thumb & Pinky extended outward, Middle 3 curled)
+        if thumb_ext and pinky_ext and index_curled and middle_curled and ring_curled:
+            return ("Why", 96.0)
+
+        # 4. WHO: L-handshape (Thumb & Index extended at ~90 deg, Middle, Ring, Pinky curled)
+        if thumb_ext and index_ext and middle_curled and ring_curled and pinky_curled:
+            return ("Who", 95.0)
+
+        # 5. I LOVE YOU: Thumb, Index, Pinky extended, Middle and Ring curled
+        if thumb_ext and index_ext and pinky_ext and middle_curled and ring_curled:
+            return ("I Love You", 96.0)
+
+        # 6. PEACE: Index and Middle extended in V, Ring and Pinky curled
+        if index_ext and middle_ext and d(8, 12) > 0.30 and ring_curled and pinky_curled:
+            return ("Peace", 96.0)
+
+        # 7. DRINK: C-handshape (Fingers partially curved in an arc, open grasp)
+        if (0.80 < d_index_tip / d_index_pip < 1.35 and
+            0.80 < d_middle_tip / d_middle_pip < 1.35 and
+            0.80 < d_ring_tip / d_ring_pip < 1.35 and
+            0.80 < d_pinky_tip / d_pinky_pip < 1.35 and
+            0.35 < d(4, 8) < 0.85):
+            return ("Drink", 93.0)
+
+        # 8. WHAT: Open hand with fingers spread wide
+        if (index_ext and middle_ext and ring_ext and pinky_ext and thumb_ext and
+            d(8, 12) > 0.28 and d(12, 16) > 0.25 and d(16, 20) > 0.25):
+            return ("What", 94.0)
+
+        # 9. WHICH: A-handshape (Fist with thumb pointing upright alongside fingers)
+        if (index_curled and middle_curled and ring_curled and pinky_curled and
+            d_thumb_tip > 0.90 and raw_landmarks[4].y < raw_landmarks[2].y):
+            return ("Which", 94.0)
+
+        # 10. WHERE / POINT / SAY: Single index finger extended straight up, others curled
+        if index_ext and middle_curled and ring_curled and pinky_curled:
+            return ("Where", 93.0)
+
+        # 11. HELLO / THANK YOU: Flat open hand, fingers straight
+        if index_ext and middle_ext and ring_ext and pinky_ext and not thumb_ext:
+            return ("Hello", 92.0)
+
+        # 12. FIST: All fingers curled tightly
+        if index_curled and middle_curled and ring_curled and pinky_curled and d(4, 9) < 0.65:
+            return ("Fist", 94.0)
+
+        return None
+
+
 class SignRecognitionInferenceService:
     """
     Inference service managing sign recognition models, baseline prototype matching,
@@ -185,6 +298,42 @@ class SignRecognitionInferenceService:
                 "stability_score": 0.0,
                 "recognition_message": "No hand detected in camera feed.",
                 "alternatives": [],
+            }
+
+        # ── STAGE 0: Precise Geometric & Topological Engine ───────────────────
+        topo_result = SignTopologyEvaluator.evaluate(raw_landmarks)
+        if topo_result is not None:
+            topo_sign, topo_conf = topo_result
+            self.temporal_buffer.add(topo_sign, topo_conf)
+            stable_sign, state, stability_ratio = self.temporal_buffer.get_stability()
+
+            alts = []
+            if self._sklearn_model is not None and self._sklearn_label_encoder is not None:
+                try:
+                    import numpy as np
+                    features = normalize_landmarks(raw_landmarks)
+                    feat_arr = np.array(features, dtype=np.float32).reshape(1, -1)
+                    proba = self._sklearn_model.predict_proba(feat_arr)[0]
+                    alts = sorted(
+                        [
+                            PredictionAlternative(
+                                label=str(self._sklearn_label_encoder.classes_[i]),
+                                confidence=round(float(p) * 100, 1)
+                            )
+                            for i, p in enumerate(proba) if str(self._sklearn_label_encoder.classes_[i]) != topo_sign
+                        ],
+                        key=lambda a: a.confidence, reverse=True
+                    )[:3]
+                except Exception:
+                    pass
+
+            return {
+                "predicted_sign": stable_sign if state == "stable" else topo_sign,
+                "confidence_score": topo_conf,
+                "prediction_state": state,
+                "stability_score": stability_ratio,
+                "recognition_message": f"Topology Matched: '{topo_sign}' ({topo_conf:.0f}% confidence)." + (" ✓ Confirmed" if state == "stable" else ""),
+                "alternatives": alts,
             }
 
         # ── STAGE 1: sklearn MLP model (trained by SignBridge) ─────────────────

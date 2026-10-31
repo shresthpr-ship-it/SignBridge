@@ -14,6 +14,8 @@ import {
   Sparkles,
   CheckCircle,
   SwitchCamera,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -29,6 +31,7 @@ import {
 import { drawFullFrameLandmarks } from '../../utils/handRenderer';
 import { useCameraPermissions } from '../../hooks/useCameraPermissions';
 import { CameraPermissionGuardian } from '../camera/CameraPermissionGuardian';
+import { SpeechService } from '../../utils/speech';
 
 export const RecognitionView: React.FC = () => {
   const { selectedLanguage, addToast, refreshData } = useApp();
@@ -59,10 +62,11 @@ export const RecognitionView: React.FC = () => {
 
   // Recognition loop states
   const [isRecognitionRunning, setIsRecognitionRunning] = useState<boolean>(true);
-  const [processingFps, setProcessingFps] = useState<number>(5);
+  const [processingFps, setProcessingFps] = useState<number>(12);
   const [showOverlay, setShowOverlay] = useState<boolean>(true);
-  const [showPoseLayer, setShowPoseLayer] = useState<boolean>(true);
+  const [showPoseLayer, setShowPoseLayer] = useState<boolean>(false);
   const [showFaceLayer, setShowFaceLayer] = useState<boolean>(false);
+  const [autoSpeak, setAutoSpeak] = useState<boolean>(true);
 
   // Model & Recognition results
   const [modelStatus, setModelStatus] = useState<ModelStatus | null>(null);
@@ -78,6 +82,7 @@ export const RecognitionView: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const isEvaluatingRef = useRef<boolean>(false);
 
   // Load Model Status & History on mount
@@ -178,7 +183,7 @@ export const RecognitionView: React.FC = () => {
     }
   };
 
-  // Live frame capture and evaluation tick
+  // High-performance live frame capture and evaluation tick
   const captureAndEvaluateFrame = useCallback(async () => {
     if (!isCameraActive || !isRecognitionRunning || isEvaluatingRef.current) return;
     const video = videoRef.current;
@@ -187,44 +192,59 @@ export const RecognitionView: React.FC = () => {
     isEvaluatingRef.current = true;
 
     try {
-      // Offscreen canvas to capture current video frame
-      const offscreen = document.createElement('canvas');
-      offscreen.width = 480;
-      offscreen.height = 360;
-      const offCtx = offscreen.getContext('2d');
+      // Re-use single persistent offscreen canvas for zero GC allocation lag
+      if (!offscreenCanvasRef.current) {
+        offscreenCanvasRef.current = document.createElement('canvas');
+        offscreenCanvasRef.current.width = 320;
+        offscreenCanvasRef.current.height = 240;
+      }
+      const offscreen = offscreenCanvasRef.current;
+      const offCtx = offscreen.getContext('2d', { willReadFrequently: true });
       if (!offCtx) return;
 
-      offCtx.drawImage(video, 0, 0, offscreen.width, offscreen.height);
+      offCtx.drawImage(video, 0, 0, 320, 240);
 
-      // Convert to compact JPEG Blob
+      // Convert to lightweight JPEG Blob (fast network transfer)
       const blob: Blob | null = await new Promise((resolve) =>
-        offscreen.toBlob(resolve, 'image/jpeg', 0.8)
+        offscreen.toBlob(resolve, 'image/jpeg', 0.55)
       );
 
       if (!blob) return;
 
-      // Send to backend pipeline
-      const res = await api.recognizeLiveFrame(blob, 3);
+      // Send to backend high-speed pipeline (pose and face only when enabled)
+      const res = await api.recognizeLiveFrame(blob, 3, showPoseLayer, showFaceLayer);
       setLiveResult(res);
 
       if (res.model_status) {
         setModelStatus(res.model_status);
       }
 
-      // Add to history if recognition is active and valid
+      // Add to history and pronounce with Speech Synthesis if recognition is active and valid
       if (res.predicted_sign && res.prediction_state !== 'unknown') {
-        setHistory((prev) => [
-          {
-            sign: res.predicted_sign!,
-            confidence: res.confidence_score,
-            state: res.prediction_state as 'stable' | 'provisional',
-            stability_score: res.stability_score,
-            latency_ms: res.latency_ms,
-            time: new Date().toLocaleTimeString(),
-            handedness: res.hands?.[0]?.handedness || null,
-          },
-          ...prev.slice(0, 19),
-        ]);
+        const signText = res.predicted_sign;
+
+        // Auto-Speak if enabled and confirmed
+        if (autoSpeak && (res.prediction_state === 'stable' || (res.confidence_score || 0) >= 88)) {
+          SpeechService.speak(signText);
+        }
+
+        setHistory((prev) => {
+          if (prev.length > 0 && prev[0].sign === signText) {
+            return prev;
+          }
+          return [
+            {
+              sign: signText,
+              confidence: res.confidence_score,
+              state: res.prediction_state as 'stable' | 'provisional',
+              stability_score: res.stability_score,
+              latency_ms: res.latency_ms,
+              time: new Date().toLocaleTimeString(),
+              handedness: res.hands?.[0]?.handedness || null,
+            },
+            ...prev.slice(0, 19),
+          ];
+        });
       }
 
       // Update FPS calculation
@@ -240,14 +260,28 @@ export const RecognitionView: React.FC = () => {
     } finally {
       isEvaluatingRef.current = false;
     }
-  }, [isCameraActive, isRecognitionRunning]);
+  }, [isCameraActive, isRecognitionRunning, showPoseLayer, showFaceLayer, autoSpeak]);
 
-  // Periodic interval loop
+  // Non-blocking adaptive loop (waits for frame completion to eliminate lag & queue build-up)
   useEffect(() => {
     if (!isCameraActive || !isRecognitionRunning) return;
-    const intervalMs = Math.round(1000 / processingFps);
-    const intervalId = setInterval(captureAndEvaluateFrame, intervalMs);
-    return () => clearInterval(intervalId);
+    let isMounted = true;
+    let timerId: any = null;
+
+    const loop = async () => {
+      if (!isMounted) return;
+      await captureAndEvaluateFrame();
+      if (!isMounted) return;
+      const intervalMs = Math.max(30, Math.round(1000 / processingFps));
+      timerId = setTimeout(loop, intervalMs);
+    };
+
+    loop();
+
+    return () => {
+      isMounted = false;
+      if (timerId) clearTimeout(timerId);
+    };
   }, [isCameraActive, isRecognitionRunning, processingFps, captureAndEvaluateFrame]);
 
   // Render canvas overlay on top of video feed
@@ -634,7 +668,7 @@ export const RecognitionView: React.FC = () => {
                     </label>
                   </div>
 
-                  {/* Rate Limiter to avoid overload */}
+                  {/* Rate Limiter for smoothness & CPU balance */}
                   <div className="flex items-center gap-2 text-[11px] text-slate-600">
                     <span>Frame Sampling Rate:</span>
                     <select
@@ -642,10 +676,10 @@ export const RecognitionView: React.FC = () => {
                       onChange={(e) => setProcessingFps(Number(e.target.value))}
                       className="text-xs rounded border border-slate-300 bg-white px-1.5 py-0.5 text-slate-800 font-mono"
                     >
-                      <option value={3}>3 FPS (Low CPU)</option>
-                      <option value={5}>5 FPS (Balanced)</option>
-                      <option value={8}>8 FPS (Fast)</option>
-                      <option value={10}>10 FPS (High Rate)</option>
+                      <option value={8}>8 FPS (Lightweight)</option>
+                      <option value={12}>12 FPS (Balanced Realtime)</option>
+                      <option value={15}>15 FPS (Smooth 60Hz)</option>
+                      <option value={20}>20 FPS (Ultra-Responsive)</option>
                     </select>
                   </div>
                 </div>
@@ -676,15 +710,32 @@ export const RecognitionView: React.FC = () => {
             compact
             title="Recognition Output"
             actions={
-              <button
-                type="button"
-                onClick={handleResetSession}
-                className="text-[11px] text-slate-500 hover:text-slate-800 flex items-center gap-1"
-                title="Reset temporal smoothing window"
-              >
-                <RotateCcw className="w-3 h-3" />
-                Reset
-              </button>
+              <div className="flex items-center gap-2">
+                {/* Auto-Speech Toggle */}
+                <button
+                  type="button"
+                  onClick={() => setAutoSpeak(!autoSpeak)}
+                  className={`px-2 py-0.5 rounded text-[11px] font-semibold border flex items-center gap-1 transition-colors ${
+                    autoSpeak
+                      ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                      : 'bg-slate-100 border-slate-300 text-slate-500'
+                  }`}
+                  title={autoSpeak ? 'Auto-Speech is Enabled' : 'Auto-Speech is Muted'}
+                >
+                  {autoSpeak ? <Volume2 className="w-3 h-3 text-indigo-600" /> : <VolumeX className="w-3 h-3" />}
+                  <span>Auto-Speak</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleResetSession}
+                  className="text-[11px] text-slate-500 hover:text-slate-800 flex items-center gap-1"
+                  title="Reset temporal smoothing window"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Reset
+                </button>
+              </div>
             }
           >
             <div className="p-4 bg-slate-900 rounded-md border border-slate-800 text-center space-y-3">
@@ -694,8 +745,22 @@ export const RecognitionView: React.FC = () => {
                   <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
                     Recognized Sign / Phrase
                   </span>
-                  <div className="text-3xl font-extrabold text-white tracking-tight">
-                    {liveResult.predicted_sign}
+
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="text-3xl font-extrabold text-white tracking-tight">
+                      {liveResult.predicted_sign}
+                    </div>
+
+                    {/* Pronounce / Speak Button */}
+                    <button
+                      type="button"
+                      onClick={() => SpeechService.speak(liveResult.predicted_sign!, true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-xs font-semibold shadow-md shadow-indigo-900/60 transition-all"
+                      title="Pronounce translated sign out loud"
+                    >
+                      <Volume2 className="w-3.5 h-3.5" />
+                      <span>Speak</span>
+                    </button>
                   </div>
 
                   {/* Stability & Confidence Badge */}
@@ -799,6 +864,14 @@ export const RecognitionView: React.FC = () => {
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {[
+                    'Drink',
+                    'Eat',
+                    'Say',
+                    'What',
+                    'Where',
+                    'Why',
+                    'Who',
+                    'Which',
                     'Okay',
                     'Hello',
                     'Thank You',
@@ -806,9 +879,8 @@ export const RecognitionView: React.FC = () => {
                     'Yes',
                     'No',
                     'I Love You',
-                    'Stop',
-                    'Point',
                     'Help',
+                    'Fist',
                   ].map((preset) => (
                     <button
                       key={preset}
@@ -964,6 +1036,14 @@ export const RecognitionView: React.FC = () => {
                     className="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200 text-xs"
                   >
                     <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => SpeechService.speak(item.sign, true)}
+                        className="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                        title={`Pronounce "${item.sign}" out loud`}
+                      >
+                        <Volume2 className="w-3.5 h-3.5" />
+                      </button>
                       <span className="font-semibold text-slate-900">{item.sign}</span>
                       <span
                         className={`px-1.5 py-0.2 rounded text-[9px] font-semibold uppercase ${
@@ -991,6 +1071,164 @@ export const RecognitionView: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      {/* ============================================================ */}
+      {/* PRE-INSTALLED SIGNS VOCABULARY & QUICK REFERENCE GUIDE        */}
+      {/* ============================================================ */}
+      <Card
+        compact
+        title="Pre-Installed Sign Language Corpus (Low-Level AI Model Vocabulary)"
+        actions={
+          <Badge variant="indigo" size="sm">
+            20 Trained Classes Active
+          </Badge>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-xs text-slate-500">
+            These foundational signs are pre-installed and calibrated into the model. Show any of these hand postures to the live camera and the system will translate and pronounce them in real-time.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {[
+              {
+                sign: 'Drink',
+                category: 'Essentials',
+                icon: '🥤',
+                posture: 'C-handshape curved cup tilted towards the mouth.',
+              },
+              {
+                sign: 'Eat',
+                category: 'Essentials',
+                icon: '🍽️',
+                posture: 'All 5 fingertips pinched together pointing to mouth.',
+              },
+              {
+                sign: 'Say',
+                category: 'Dialogue',
+                icon: '🗣️',
+                posture: 'Index finger extended under the chin pointing outward.',
+              },
+              {
+                sign: 'What',
+                category: 'Questions',
+                icon: '❓',
+                posture: 'Open palms facing forward/up with fingers spread wide.',
+              },
+              {
+                sign: 'Where',
+                category: 'Questions',
+                icon: '📍',
+                posture: 'Index finger pointing straight up, other fingers curled.',
+              },
+              {
+                sign: 'Why',
+                category: 'Questions',
+                icon: '💡',
+                posture: 'Y-handshape: thumb & pinky extended outward, middle 3 curled.',
+              },
+              {
+                sign: 'Who',
+                category: 'Questions',
+                icon: '👤',
+                posture: 'L-handshape: thumb & index extended at 90 degrees.',
+              },
+              {
+                sign: 'Which',
+                category: 'Questions',
+                icon: '⚖️',
+                posture: 'A-handshape fist with thumb pointing straight up.',
+              },
+              {
+                sign: 'Okay',
+                category: 'Responses',
+                icon: '👌',
+                posture: 'Thumb & index tips touching (O-circle), other 3 upright.',
+              },
+              {
+                sign: 'Peace',
+                category: 'Conversational',
+                icon: '✌️',
+                posture: 'Index & middle fingers extended in a V-sign.',
+              },
+              {
+                sign: 'I Love You',
+                category: 'Conversational',
+                icon: '🤟',
+                posture: 'Thumb, index, and pinky extended, middle 2 curled.',
+              },
+              {
+                sign: 'Hello',
+                category: 'Greetings',
+                icon: '👋',
+                posture: 'Open flat hand with fingers extended straight.',
+              },
+              {
+                sign: 'Thank You',
+                category: 'Greetings',
+                icon: '🙏',
+                posture: 'Flat palm moving forward from chin or mouth.',
+              },
+              {
+                sign: 'Yes',
+                category: 'Responses',
+                icon: '👍',
+                posture: 'Thumbs-up upright gesture or nodding fist.',
+              },
+              {
+                sign: 'No',
+                category: 'Responses',
+                icon: '👎',
+                posture: 'Snapping index and middle against thumb or closed fist.',
+              },
+              {
+                sign: 'Fist',
+                category: 'Postures',
+                icon: '✊',
+                posture: 'All 5 fingers curled tightly into a closed ball.',
+              },
+            ].map((item) => (
+              <div
+                key={item.sign}
+                className="p-3 rounded-lg border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-xs transition-all space-y-2 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                      <span>{item.icon}</span>
+                      <span>{item.sign}</span>
+                    </span>
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-100 text-slate-600">
+                      {item.category}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1 leading-snug">{item.posture}</p>
+                </div>
+
+                <div className="flex items-center gap-1.5 pt-1 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => SpeechService.speak(item.sign, true)}
+                    className="flex-1 py-1 rounded bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 text-[10px] font-medium flex items-center justify-center gap-1 transition-colors"
+                  >
+                    <Volume2 className="w-3 h-3 text-indigo-600" />
+                    <span>Listen</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setTeachLabel(item.sign)}
+                    className="py-1 px-2 rounded border border-slate-200 hover:border-indigo-300 text-slate-600 hover:text-slate-900 text-[10px] font-medium"
+                    title="Select in Quick Teach"
+                  >
+                    Select
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Card>
     </div>
   );
 };

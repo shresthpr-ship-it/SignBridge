@@ -257,7 +257,7 @@
     "name": "G",
     "category": "Taught",
     "description": "Taught gesture for ASL",
-    "sample_count": 8,
+    "sample_count": 16,
     "created_at": "2026-10-31T09:14:08.900231"
   },
   {
@@ -265,7 +265,191 @@
     "name": "H",
     "category": "Taught",
     "description": "Taught gesture for ASL",
-    "sample_count": 8,
+    "sample_count": 16,
     "created_at": "2026-10-31T09:17:02.492446"
+  },
+  {
+    "id": "cls-11bf7dd6",
+    "name": "Eating",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T10:11:25.294691"
+  },
+  {
+    "id": "cls-5aae582d",
+    "name": "I",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T10:13:27.828744"
+  },
+  {
+    "id": "cls-0f7d0c82",
+    "name": "J",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T10:13:41.632041"
+  },
+  {
+    "id": "cls-a3ebcaa6",
+    "name": "K",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T10:14:03.971016"
+  },
+  {
+    "id": "cls-a42a34ff",
+    "name": "L",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T10:14:28.355878"
+  },
+  {
+    "id": "cls-680d8e30",
+    "name": "M",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T10:14:53.644304"
+  },
+  {
+    "id": "cls-1ca0106a",
+    "name": "N",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T10:15:14.834535"
+  },
+  {
+    "id": "cls-5a2bcb97",
+    "name": "O",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T10:15:43.929511"
+  },
+  {
+    "id": "cls-39f2bfea",
+    "name": "p",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T10:16:25.284406"
+  },
+  {
+    "id": "cls-befe0e37",
+    "name": "Q",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T10:16:56.064545"
+  },
+  {
+    "id": "cls-84b17306",
+    "name": "R",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T10:17:15.719623"
+  },
+  {
+    "id": "cls-60494fbe",
+    "name": "S",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T10:17:47.935135"
+  },
+  {
+    "id": "cls-fb9de081",
+    "name": "T",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T10:18:34.242662"
+  },
+  {
+    "id": "cls-119b2098",
+    "name": "U",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T10:18:52.217919"
+  },
+  {
+    "id": "cls-5b658d5c",
+    "name": "V",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T10:19:22.577949"
+  },
+  {
+    "id": "cls-4fac7bf3",
+    "name": "Drink",
+    "category": "Essentials",
+    "description": "Curved C-handshape mimicking holding a cup.",
+    "sample_count": 15,
+    "created_at": "2026-10-31T12:06:40.931691"
+  },
+  {
+    "id": "cls-176053a7",
+    "name": "Eat",
+    "category": "Essentials",
+    "description": "All 5 fingertips pinched together pointing toward mouth.",
+    "sample_count": 15,
+    "created_at": "2026-10-31T12:06:40.964799"
+  },
+  {
+    "id": "cls-302c87d6",
+    "name": "Say",
+    "category": "Conversational",
+    "description": "Index finger extended from under the chin/mouth pointing outward.",
+    "sample_count": 15,
+    "created_at": "2026-10-31T12:06:40.995412"
+  },
+  {
+    "id": "cls-7449715d",
+    "name": "What",
+    "category": "Questions",
+    "description": "Open palms facing forward/up with fingers spread wide.",
+    "sample_count": 15,
+    "created_at": "2026-10-31T12:06:41.028499"
+  },
+  {
+    "id": "cls-35dc45de",
+    "name": "Where",
+    "category": "Questions",
+    "description": "Index finger pointed upward waving side to side.",
+    "sample_count": 15,
+    "created_at": "2026-10-31T12:06:41.056607"
+  },
+  {
+    "id": "cls-da24cda3",
+    "name": "Why",
+    "category": "Questions",
+    "description": "Y-handshape with thumb and pinky extended, middle 3 curled.",
+    "sample_count": 15,
+    "created_at": "2026-10-31T12:06:41.087561"
+  },
+  {
+    "id": "cls-26b33ee3",
+    "name": "Who",
+    "category": "Questions",
+    "description": "L-handshape with thumb and index finger extended at 90 degrees.",
+    "sample_count": 15,
+    "created_at": "2026-10-31T12:06:41.120461"
+  },
+  {
+    "id": "cls-8cfc56bd",
+    "name": "Which",
+    "category": "Questions",
+    "description": "A-handshape fist with thumb pointing upright.",
+    "sample_count": 15,
+    "created_at": "2026-10-31T12:06:41.150705"
   }
 ]

@@ -1,352 +1,352 @@
 [
   {
-    "id": "act-eb749b",
-    "action": "Gesture Taught",
-    "description": "User taught gesture 'H' with 8 sample variations in ASL.",
-    "timestamp": "2026-10-31T09:17:03.548581",
+    "id": "act-0f9d31",
+    "action": "Sample Deleted",
+    "description": "Removed sample smp-87b5dbeb (TestGesture_Valid) from corpus.",
+    "timestamp": "2026-10-31T12:14:01.075225",
     "category": "system"
   },
   {
-    "id": "act-6488ed",
+    "id": "act-30ed45",
     "action": "Sample Captured",
-    "description": "Logged sample smp-c29f7464 for 'H' [TEST]. Status: approved",
-    "timestamp": "2026-10-31T09:17:03.533924",
+    "description": "Logged sample smp-87b5dbeb for 'TestGesture_Valid' [TEST]. Status: approved",
+    "timestamp": "2026-10-31T12:14:00.913946",
     "category": "capture"
   },
   {
-    "id": "act-1a87d9",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-468afdf1 for 'H' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:17:03.401510",
-    "category": "capture"
+    "id": "act-d04b26",
+    "action": "Class Deleted",
+    "description": "Sign class 'TestSignGesture_A' deleted from vocabulary.",
+    "timestamp": "2026-10-31T12:14:00.763015",
+    "category": "system"
   },
   {
-    "id": "act-cef2cd",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-256f6988 for 'H' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:17:03.276626",
-    "category": "capture"
-  },
-  {
-    "id": "act-d93cc8",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-f5d8d2f9 for 'H' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:17:03.148651",
-    "category": "capture"
-  },
-  {
-    "id": "act-596370",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-1999a3a0 for 'H' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:17:03.020088",
-    "category": "capture"
-  },
-  {
-    "id": "act-d90419",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-95cd9bc2 for 'H' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:17:02.885838",
-    "category": "capture"
-  },
-  {
-    "id": "act-308fcb",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-e511d29d for 'H' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:17:02.760147",
-    "category": "capture"
-  },
-  {
-    "id": "act-99e8eb",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-09fe219d for 'H' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:17:02.625870",
-    "category": "capture"
-  },
-  {
-    "id": "act-9bef11",
+    "id": "act-7dcfbe",
     "action": "Class Created",
-    "description": "Added new sign label 'H' in category 'Taught'",
-    "timestamp": "2026-10-31T09:17:02.493830",
+    "description": "Added new sign label 'TestSignGesture_A' in category 'Testing'",
+    "timestamp": "2026-10-31T12:14:00.722027",
     "category": "class"
   },
   {
-    "id": "act-441315",
-    "action": "Gesture Taught",
-    "description": "User taught gesture 'G' with 8 sample variations in ASL.",
-    "timestamp": "2026-10-31T09:14:09.923702",
-    "category": "system"
-  },
-  {
-    "id": "act-0c375d",
+    "id": "act-b5158e",
     "action": "Sample Captured",
-    "description": "Logged sample smp-67ccdae9 for 'G' [TEST]. Status: approved",
-    "timestamp": "2026-10-31T09:14:09.907808",
+    "description": "Logged sample smp-af874a27 for 'Which' [VAL]. Status: approved",
+    "timestamp": "2026-10-31T12:06:56.661554",
     "category": "capture"
   },
   {
-    "id": "act-8d2520",
+    "id": "act-469816",
     "action": "Sample Captured",
-    "description": "Logged sample smp-be38d5d7 for 'G' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:14:09.784942",
+    "description": "Logged sample smp-96b8e58b for 'Which' [VAL]. Status: approved",
+    "timestamp": "2026-10-31T12:06:56.525786",
     "category": "capture"
   },
   {
-    "id": "act-ef9f68",
+    "id": "act-0a1832",
     "action": "Sample Captured",
-    "description": "Logged sample smp-a4d92458 for 'G' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:14:09.659965",
+    "description": "Logged sample smp-7e0c2ad4 for 'Which' [VAL]. Status: approved",
+    "timestamp": "2026-10-31T12:06:56.387245",
     "category": "capture"
   },
   {
-    "id": "act-e25f1d",
+    "id": "act-ee5a9a",
     "action": "Sample Captured",
-    "description": "Logged sample smp-acc08f1e for 'G' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:14:09.531113",
+    "description": "Logged sample smp-47ae6952 for 'Which' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:56.245476",
     "category": "capture"
   },
   {
-    "id": "act-48915f",
+    "id": "act-d32361",
     "action": "Sample Captured",
-    "description": "Logged sample smp-8f4831e0 for 'G' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:14:09.406734",
+    "description": "Logged sample smp-0f09337e for 'Which' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:56.110141",
     "category": "capture"
   },
   {
-    "id": "act-267003",
+    "id": "act-09119a",
     "action": "Sample Captured",
-    "description": "Logged sample smp-c23dc631 for 'G' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:14:09.283920",
+    "description": "Logged sample smp-72590585 for 'Which' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:55.976861",
     "category": "capture"
   },
   {
-    "id": "act-26f454",
+    "id": "act-049d67",
     "action": "Sample Captured",
-    "description": "Logged sample smp-49df01c7 for 'G' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:14:09.157323",
+    "description": "Logged sample smp-f8c4e755 for 'Which' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:55.841053",
     "category": "capture"
   },
   {
-    "id": "act-ce24a8",
+    "id": "act-a096c2",
     "action": "Sample Captured",
-    "description": "Logged sample smp-691b9ed8 for 'G' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:14:09.027321",
+    "description": "Logged sample smp-52310287 for 'Which' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:55.704438",
     "category": "capture"
   },
   {
-    "id": "act-e3e55c",
-    "action": "Class Created",
-    "description": "Added new sign label 'G' in category 'Taught'",
-    "timestamp": "2026-10-31T09:14:08.901866",
-    "category": "class"
-  },
-  {
-    "id": "act-88e1af",
-    "action": "Gesture Taught",
-    "description": "User taught gesture 'F' with 8 sample variations in ASL.",
-    "timestamp": "2026-10-31T09:13:34.590012",
-    "category": "system"
-  },
-  {
-    "id": "act-24f3e8",
+    "id": "act-b2cb28",
     "action": "Sample Captured",
-    "description": "Logged sample smp-8ddf9ad6 for 'F' [TEST]. Status: approved",
-    "timestamp": "2026-10-31T09:13:34.575752",
+    "description": "Logged sample smp-62f0a1b9 for 'Which' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:55.576603",
     "category": "capture"
   },
   {
-    "id": "act-41472a",
+    "id": "act-0924de",
     "action": "Sample Captured",
-    "description": "Logged sample smp-a92b6bc8 for 'F' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:13:34.451116",
+    "description": "Logged sample smp-9df495c1 for 'Which' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:55.449425",
     "category": "capture"
   },
   {
-    "id": "act-290afb",
+    "id": "act-b3ab84",
     "action": "Sample Captured",
-    "description": "Logged sample smp-08f9b807 for 'F' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:13:34.311073",
+    "description": "Logged sample smp-cf4143b5 for 'Which' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:55.320860",
     "category": "capture"
   },
   {
-    "id": "act-14ddd1",
+    "id": "act-2798a6",
     "action": "Sample Captured",
-    "description": "Logged sample smp-1135eaf7 for 'F' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:13:34.178042",
+    "description": "Logged sample smp-f9fcc501 for 'Which' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:55.185967",
     "category": "capture"
   },
   {
-    "id": "act-242bd1",
+    "id": "act-9d7c54",
     "action": "Sample Captured",
-    "description": "Logged sample smp-e9f56f8c for 'F' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:13:34.049740",
+    "description": "Logged sample smp-d7877023 for 'Which' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:55.052302",
     "category": "capture"
   },
   {
-    "id": "act-ec302d",
+    "id": "act-eed750",
     "action": "Sample Captured",
-    "description": "Logged sample smp-14722183 for 'F' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:13:33.925670",
+    "description": "Logged sample smp-54c777b1 for 'Which' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:54.919274",
     "category": "capture"
   },
   {
-    "id": "act-2e37b5",
+    "id": "act-b404b6",
     "action": "Sample Captured",
-    "description": "Logged sample smp-4ec5c9dd for 'F' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:13:33.797751",
+    "description": "Logged sample smp-fd5ca5ba for 'Which' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:54.773050",
     "category": "capture"
   },
   {
-    "id": "act-19cd1a",
+    "id": "act-87184c",
     "action": "Sample Captured",
-    "description": "Logged sample smp-ce44eb87 for 'F' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:13:33.671483",
+    "description": "Logged sample smp-318cb98e for 'Who' [VAL]. Status: approved",
+    "timestamp": "2026-10-31T12:06:54.637774",
     "category": "capture"
   },
   {
-    "id": "act-00875e",
-    "action": "Class Created",
-    "description": "Added new sign label 'F' in category 'Taught'",
-    "timestamp": "2026-10-31T09:13:33.541980",
-    "category": "class"
-  },
-  {
-    "id": "act-994a23",
-    "action": "Gesture Taught",
-    "description": "User taught gesture 'E' with 8 sample variations in ASL.",
-    "timestamp": "2026-10-31T09:12:37.096249",
-    "category": "system"
-  },
-  {
-    "id": "act-d69e36",
+    "id": "act-b3015e",
     "action": "Sample Captured",
-    "description": "Logged sample smp-bc179e9e for 'E' [TEST]. Status: approved",
-    "timestamp": "2026-10-31T09:12:37.082788",
+    "description": "Logged sample smp-9a52354f for 'Who' [VAL]. Status: approved",
+    "timestamp": "2026-10-31T12:06:54.505460",
     "category": "capture"
   },
   {
-    "id": "act-b4855b",
+    "id": "act-3129a0",
     "action": "Sample Captured",
-    "description": "Logged sample smp-99ab29da for 'E' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:12:36.955015",
+    "description": "Logged sample smp-39fb8bf8 for 'Who' [VAL]. Status: approved",
+    "timestamp": "2026-10-31T12:06:54.370228",
     "category": "capture"
   },
   {
-    "id": "act-6c0a6f",
+    "id": "act-00f129",
     "action": "Sample Captured",
-    "description": "Logged sample smp-e61e6f4e for 'E' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:12:36.824998",
+    "description": "Logged sample smp-f83f7c9d for 'Who' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:54.236719",
     "category": "capture"
   },
   {
-    "id": "act-a07407",
+    "id": "act-3b6626",
     "action": "Sample Captured",
-    "description": "Logged sample smp-1bae8544 for 'E' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:12:36.706780",
+    "description": "Logged sample smp-fe04176f for 'Who' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:54.104465",
     "category": "capture"
   },
   {
-    "id": "act-4e89ad",
+    "id": "act-7cca62",
     "action": "Sample Captured",
-    "description": "Logged sample smp-19e5043e for 'E' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:12:36.578978",
+    "description": "Logged sample smp-0cf6610e for 'Who' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:53.976816",
     "category": "capture"
   },
   {
-    "id": "act-373457",
+    "id": "act-2acf75",
     "action": "Sample Captured",
-    "description": "Logged sample smp-8659f87d for 'E' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:12:36.456222",
+    "description": "Logged sample smp-d48ca435 for 'Who' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:53.847994",
     "category": "capture"
   },
   {
-    "id": "act-fb0fe5",
+    "id": "act-9bb060",
     "action": "Sample Captured",
-    "description": "Logged sample smp-8517118d for 'E' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:12:36.331746",
+    "description": "Logged sample smp-a04d6ced for 'Who' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:53.717176",
     "category": "capture"
   },
   {
-    "id": "act-b07b34",
+    "id": "act-3f14ea",
     "action": "Sample Captured",
-    "description": "Logged sample smp-33af7700 for 'E' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:12:36.207163",
+    "description": "Logged sample smp-68aba36f for 'Who' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:53.582387",
     "category": "capture"
   },
   {
-    "id": "act-530b44",
-    "action": "Gesture Taught",
-    "description": "User taught gesture 'E' with 8 sample variations in ASL.",
-    "timestamp": "2026-10-31T09:12:27.466565",
-    "category": "system"
-  },
-  {
-    "id": "act-d306c2",
+    "id": "act-81d494",
     "action": "Sample Captured",
-    "description": "Logged sample smp-90ec739a for 'E' [TEST]. Status: approved",
-    "timestamp": "2026-10-31T09:12:27.450517",
+    "description": "Logged sample smp-03eead4b for 'Who' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:53.447803",
     "category": "capture"
   },
   {
-    "id": "act-de6a7c",
+    "id": "act-76108a",
     "action": "Sample Captured",
-    "description": "Logged sample smp-fe2964b7 for 'E' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:12:27.333108",
+    "description": "Logged sample smp-8c88a55f for 'Who' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:53.318799",
     "category": "capture"
   },
   {
-    "id": "act-449aae",
+    "id": "act-50f5a1",
     "action": "Sample Captured",
-    "description": "Logged sample smp-f9c6fd74 for 'E' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:12:27.220360",
+    "description": "Logged sample smp-a58397cd for 'Who' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:53.183207",
     "category": "capture"
   },
   {
-    "id": "act-c55aa0",
+    "id": "act-69871e",
     "action": "Sample Captured",
-    "description": "Logged sample smp-ac9eb10a for 'E' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:12:27.092322",
+    "description": "Logged sample smp-083461cc for 'Who' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:53.051664",
     "category": "capture"
   },
   {
-    "id": "act-82b699",
+    "id": "act-5469fa",
     "action": "Sample Captured",
-    "description": "Logged sample smp-545ddc7a for 'E' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:12:26.974290",
+    "description": "Logged sample smp-6f45ecbf for 'Who' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:52.919974",
     "category": "capture"
   },
   {
-    "id": "act-994903",
+    "id": "act-da8b34",
     "action": "Sample Captured",
-    "description": "Logged sample smp-cc6b7946 for 'E' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:12:26.847788",
+    "description": "Logged sample smp-46d28b99 for 'Who' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:52.788660",
     "category": "capture"
   },
   {
-    "id": "act-011e1f",
+    "id": "act-9df946",
     "action": "Sample Captured",
-    "description": "Logged sample smp-fd6edfbc for 'E' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:12:26.726597",
+    "description": "Logged sample smp-606fecdd for 'Why' [VAL]. Status: approved",
+    "timestamp": "2026-10-31T12:06:52.656417",
     "category": "capture"
   },
   {
-    "id": "act-1b19a9",
+    "id": "act-61877d",
     "action": "Sample Captured",
-    "description": "Logged sample smp-85146a63 for 'E' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T09:12:26.619381",
+    "description": "Logged sample smp-a29a29c0 for 'Why' [VAL]. Status: approved",
+    "timestamp": "2026-10-31T12:06:52.525205",
     "category": "capture"
   },
   {
-    "id": "act-e581a7",
-    "action": "Class Created",
-    "description": "Added new sign label 'E' in category 'Taught'",
-    "timestamp": "2026-10-31T09:12:26.497867",
-    "category": "class"
+    "id": "act-f22b6e",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-ac557110 for 'Why' [VAL]. Status: approved",
+    "timestamp": "2026-10-31T12:06:52.392511",
+    "category": "capture"
   },
   {
-    "id": "act-704218",
-    "action": "Gesture Taught",
-    "description": "User taught gesture 'D' with 8 sample variations in ASL.",
-    "timestamp": "2026-10-31T09:11:01.226405",
-    "category": "system"
+    "id": "act-1c08af",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-d84bf627 for 'Why' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:52.266144",
+    "category": "capture"
+  },
+  {
+    "id": "act-be057d",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-9eb0c355 for 'Why' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:52.133832",
+    "category": "capture"
+  },
+  {
+    "id": "act-33b182",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-cf6b3d17 for 'Why' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:52.006313",
+    "category": "capture"
+  },
+  {
+    "id": "act-d553cf",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-747caa5e for 'Why' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:51.883182",
+    "category": "capture"
+  },
+  {
+    "id": "act-bbc7b2",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-00032131 for 'Why' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:51.754717",
+    "category": "capture"
+  },
+  {
+    "id": "act-d0d6a0",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-afb6d7e9 for 'Why' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:51.623574",
+    "category": "capture"
+  },
+  {
+    "id": "act-779c4b",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-68235224 for 'Why' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:51.491935",
+    "category": "capture"
+  },
+  {
+    "id": "act-de13a0",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-de7d9c90 for 'Why' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:51.355559",
+    "category": "capture"
+  },
+  {
+    "id": "act-0117d5",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-4508f0cf for 'Why' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:51.228377",
+    "category": "capture"
+  },
+  {
+    "id": "act-cc2e0b",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-86d5de5b for 'Why' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:51.101140",
+    "category": "capture"
+  },
+  {
+    "id": "act-baed92",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-106f3482 for 'Why' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:50.971251",
+    "category": "capture"
+  },
+  {
+    "id": "act-f01ec0",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-857b5ce1 for 'Why' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T12:06:50.841457",
+    "category": "capture"
+  },
+  {
+    "id": "act-1063d8",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-47d3498c for 'Where' [VAL]. Status: approved",
+    "timestamp": "2026-10-31T12:06:50.709472",
+    "category": "capture"
   }
 ]

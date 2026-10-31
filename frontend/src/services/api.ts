@@ -193,10 +193,15 @@ class ApiService {
   }
 
   // Live Recognition Pipeline
-  async recognizeLiveFrame(frameBlob: Blob, topK: number = 3): Promise<LiveFrameRecognitionResponse> {
+  async recognizeLiveFrame(
+    frameBlob: Blob,
+    topK: number = 3,
+    detectPose: boolean = false,
+    detectFace: boolean = false
+  ): Promise<LiveFrameRecognitionResponse> {
     const formData = new FormData();
     formData.append('file', frameBlob, 'webcam_frame.jpg');
-    const url = `${BASE_URL}/recognition/live-frame?top_k=${topK}`;
+    const url = `${BASE_URL}/recognition/live-frame?top_k=${topK}&detect_pose=${detectPose}&detect_face=${detectFace}`;
     const response = await fetch(url, {
       method: 'POST',
       body: formData,

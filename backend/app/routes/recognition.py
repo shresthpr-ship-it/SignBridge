@@ -58,10 +58,12 @@ def predict_sign(req: RecognitionRequest):
 @router.post("/live-frame")
 async def recognize_live_frame(
     file: UploadFile = File(..., description="Webcam video frame for real-time sign recognition"),
-    top_k: int = Query(3, ge=1, le=8)
+    top_k: int = Query(3, ge=1, le=8),
+    detect_pose: bool = Query(False, description="Enable pose skeleton detection"),
+    detect_face: bool = Query(False, description="Enable facial mesh detection")
 ):
     """
-    Accepts a live camera frame, executes real MediaPipe detection,
+    Accepts a live camera frame, executes high-speed MediaPipe detection,
     and returns detected 3D landmarks + model recognition evaluation.
     Clearly distinguishes landmark detection from sign recognition.
     """
@@ -77,8 +79,14 @@ async def recognize_live_frame(
 
     rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
 
-    # 1. Landmark Detection (MediaPipe Tasks 3D)
-    frame_data = vision_pipeline._extract_frame_landmarks(rgb_img, frame_idx=0, timestamp_ms=0.0)
+    # 1. High-Performance Landmark Detection (MediaPipe Tasks 3D)
+    frame_data = vision_pipeline._extract_frame_landmarks(
+        rgb_img,
+        frame_idx=0,
+        timestamp_ms=0.0,
+        detect_pose=detect_pose,
+        detect_face=detect_face
+    )
 
     # 2. Recognition Inference (Separate Inference Service)
     hand_present = len(frame_data.hands) > 0
