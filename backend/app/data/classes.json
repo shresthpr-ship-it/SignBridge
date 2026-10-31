@@ -1,0 +1,74 @@
+[
+  {
+    "id": "cls-hello",
+    "name": "Hello",
+    "category": "Greetings",
+    "description": "Open hand waving or steady palm facing forward.",
+    "sample_count": 16,
+    "created_at": "2026-10-30T19:03:30.901844"
+  },
+  {
+    "id": "cls-thanks",
+    "name": "Thank You",
+    "category": "Greetings",
+    "description": "Flat hand moving forward from chin or mouth.",
+    "sample_count": 2,
+    "created_at": "2026-10-30T19:03:30.901865"
+  },
+  {
+    "id": "cls-yes",
+    "name": "Yes",
+    "category": "Responses",
+    "description": "Upward thumb gesture or nodding fist.",
+    "sample_count": 5,
+    "created_at": "2026-10-30T19:03:30.901869"
+  },
+  {
+    "id": "cls-no",
+    "name": "No",
+    "category": "Responses",
+    "description": "Fist or index and middle snapping to thumb.",
+    "sample_count": 5,
+    "created_at": "2026-10-30T19:03:30.901873"
+  },
+  {
+    "id": "cls-peace",
+    "name": "Peace",
+    "category": "Conversational",
+    "description": "Index and middle fingers forming a clear V sign.",
+    "sample_count": 5,
+    "created_at": "2026-10-30T19:03:30.901877"
+  },
+  {
+    "id": "cls-ily",
+    "name": "I Love You",
+    "category": "Conversational",
+    "description": "Thumb, index, and pinky extended upward.",
+    "sample_count": 5,
+    "created_at": "2026-10-30T19:03:30.901881"
+  },
+  {
+    "id": "cls-help",
+    "name": "Help",
+    "category": "Emergency",
+    "description": "Thumbs-up resting atop flat open palm.",
+    "sample_count": 5,
+    "created_at": "2026-10-30T19:03:30.901937"
+  },
+  {
+    "id": "cls-water",
+    "name": "Water",
+    "category": "Essentials",
+    "description": "W-handshape tapped near mouth.",
+    "sample_count": 3,
+    "created_at": "2026-10-30T19:03:30.901941"
+  },
+  {
+    "id": "cls-d47efdad",
+    "name": "TestGesture_Valid",
+    "category": "General",
+    "description": "",
+    "sample_count": 0,
+    "created_at": "2026-10-31T08:21:10.602060"
+  }
+]

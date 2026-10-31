@@ -1,0 +1,317 @@
+[
+  {
+    "id": "act-c1337b",
+    "action": "Sample Deleted",
+    "description": "Removed sample smp-a12de442 (TestGesture_Valid) from corpus.",
+    "timestamp": "2026-10-31T08:21:54.789107",
+    "category": "system"
+  },
+  {
+    "id": "act-bc6043",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-a12de442 for 'TestGesture_Valid' [TEST]. Status: approved",
+    "timestamp": "2026-10-31T08:21:54.723913",
+    "category": "capture"
+  },
+  {
+    "id": "act-6f3401",
+    "action": "Class Deleted",
+    "description": "Sign class 'TestSignGesture_A' deleted from vocabulary.",
+    "timestamp": "2026-10-31T08:21:54.664393",
+    "category": "system"
+  },
+  {
+    "id": "act-7b3faf",
+    "action": "Class Created",
+    "description": "Added new sign label 'TestSignGesture_A' in category 'Testing'",
+    "timestamp": "2026-10-31T08:21:54.626849",
+    "category": "class"
+  },
+  {
+    "id": "act-5d844c",
+    "action": "Sample Deleted",
+    "description": "Removed sample smp-800e6d7f (TestGesture_Valid) from corpus.",
+    "timestamp": "2026-10-31T08:21:10.737035",
+    "category": "system"
+  },
+  {
+    "id": "act-98bf53",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-800e6d7f for 'TestGesture_Valid' [TEST]. Status: approved",
+    "timestamp": "2026-10-31T08:21:10.663450",
+    "category": "capture"
+  },
+  {
+    "id": "act-1ba700",
+    "action": "Class Created",
+    "description": "Added new sign label 'TestGesture_Valid' in category 'General'",
+    "timestamp": "2026-10-31T08:21:10.618064",
+    "category": "class"
+  },
+  {
+    "id": "act-6534a1",
+    "action": "Class Deleted",
+    "description": "Sign class 'TestSignGesture_A' deleted from vocabulary.",
+    "timestamp": "2026-10-31T08:21:10.577222",
+    "category": "system"
+  },
+  {
+    "id": "act-8e9014",
+    "action": "Class Created",
+    "description": "Added new sign label 'TestSignGesture_A' in category 'Testing'",
+    "timestamp": "2026-10-31T08:21:10.549973",
+    "category": "class"
+  },
+  {
+    "id": "act-1f217d",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-4ed0fc0a for 'Hello' [TRAIN]. Status: pending_review",
+    "timestamp": "2026-10-31T07:50:19.127020",
+    "category": "capture"
+  },
+  {
+    "id": "act-f2e5e1",
+    "action": "Still Image Captured",
+    "description": "Saved image for 'Hello' [ASL] by signer_yn28. Size: 1126 KB.",
+    "timestamp": "2026-10-31T07:50:19.082565",
+    "category": "capture"
+  },
+  {
+    "id": "act-981059",
+    "action": "Batch Augmentation",
+    "description": "Generated 6 augmented samples for 'Hello' via jitter transform.",
+    "timestamp": "2026-10-31T06:22:04.665408",
+    "category": "augmentation"
+  },
+  {
+    "id": "act-cbdd23",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-9f37b5c1 for 'Hello' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T06:22:04.654262",
+    "category": "capture"
+  },
+  {
+    "id": "act-ee6d15",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-20f48af6 for 'Hello' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T06:22:04.611118",
+    "category": "capture"
+  },
+  {
+    "id": "act-017128",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-a37814ec for 'Hello' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T06:22:04.566644",
+    "category": "capture"
+  },
+  {
+    "id": "act-96e3f1",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-e4f1ebd8 for 'Hello' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T06:22:04.521788",
+    "category": "capture"
+  },
+  {
+    "id": "act-0f1411",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-4378e243 for 'Hello' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T06:22:04.475471",
+    "category": "capture"
+  },
+  {
+    "id": "act-23ed9c",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-f99594f6 for 'Hello' [TRAIN]. Status: approved",
+    "timestamp": "2026-10-31T06:22:04.423475",
+    "category": "capture"
+  },
+  {
+    "id": "act-7a2c52",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-6e7a5a1b for 'Thank You' [VAL]. Status: pending_review",
+    "timestamp": "2026-10-31T06:20:56.000924",
+    "category": "capture"
+  },
+  {
+    "id": "act-42ffaa",
+    "action": "Still Image Captured",
+    "description": "Saved image for 'Thank You' [ISL] by Sighnrt. Size: 1305 KB.",
+    "timestamp": "2026-10-31T06:20:55.962877",
+    "category": "capture"
+  },
+  {
+    "id": "act-f65c47",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-6a2ef969 for 'Hello' [TRAIN]. Status: pending_review",
+    "timestamp": "2026-10-31T05:49:51.188833",
+    "category": "capture"
+  },
+  {
+    "id": "act-4da3dc",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-61d57b0f for 'Hello' [TRAIN]. Status: pending_review",
+    "timestamp": "2026-10-31T05:49:51.127948",
+    "category": "capture"
+  },
+  {
+    "id": "act-ddfd26",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-11176085 for 'Hello' [TRAIN]. Status: pending_review",
+    "timestamp": "2026-10-31T05:49:51.069860",
+    "category": "capture"
+  },
+  {
+    "id": "act-28594d",
+    "action": "Sample Approved",
+    "description": "Sample smp-60350a6c (Hello) was marked as approved.",
+    "timestamp": "2026-10-31T05:49:36.878694",
+    "category": "review"
+  },
+  {
+    "id": "act-018311",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-60350a6c for 'Hello' [TRAIN]. Status: pending_review",
+    "timestamp": "2026-10-31T05:49:21.555252",
+    "category": "capture"
+  },
+  {
+    "id": "act-ae56d0",
+    "action": "Still Image Captured",
+    "description": "Saved image for 'Hello' [ASL] by signer_cp26. Size: 1324 KB.",
+    "timestamp": "2026-10-31T05:49:21.524358",
+    "category": "capture"
+  },
+  {
+    "id": "act-f08e33",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-a3b9b5ee for 'Thank You' [TRAIN]. Status: pending_review",
+    "timestamp": "2026-10-31T05:44:22.076432",
+    "category": "capture"
+  },
+  {
+    "id": "act-1f7a97",
+    "action": "Video Clip Captured",
+    "description": "Saved video for 'Thank You' [ASL] by signer_test02. Size: 0 KB.",
+    "timestamp": "2026-10-31T05:44:22.050837",
+    "category": "capture"
+  },
+  {
+    "id": "act-d3967b",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-b77227e9 for 'Hello' [TRAIN]. Status: pending_review",
+    "timestamp": "2026-10-31T05:43:50.213711",
+    "category": "capture"
+  },
+  {
+    "id": "act-29a290",
+    "action": "Still Image Captured",
+    "description": "Saved image for 'Hello' [ASL] by signer_test01. Size: 0 KB.",
+    "timestamp": "2026-10-31T05:43:50.198090",
+    "category": "capture"
+  },
+  {
+    "id": "act-155dfc",
+    "action": "Sample Approved",
+    "description": "Sample smp-17204219 (Water) was marked as approved.",
+    "timestamp": "2026-10-31T05:32:33.788569",
+    "category": "review"
+  },
+  {
+    "id": "act-46f272",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-fd2f3511 for 'Water' [TEST]. Status: pending_review",
+    "timestamp": "2026-10-31T05:32:09.043970",
+    "category": "capture"
+  },
+  {
+    "id": "act-e77804",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-17204219 for 'Water' [TEST]. Status: pending_review",
+    "timestamp": "2026-10-31T05:32:08.987206",
+    "category": "capture"
+  },
+  {
+    "id": "act-9837b3",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-5d4e08b7 for 'Water' [TEST]. Status: pending_review",
+    "timestamp": "2026-10-31T05:32:08.928948",
+    "category": "capture"
+  },
+  {
+    "id": "act-b1e825",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-1aacd030 for 'Hello' [TRAIN]. Status: pending_review",
+    "timestamp": "2026-10-31T05:31:53.597216",
+    "category": "capture"
+  },
+  {
+    "id": "act-865ce9",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-7d5b940d for 'Hello' [TRAIN]. Status: pending_review",
+    "timestamp": "2026-10-31T05:31:53.532828",
+    "category": "capture"
+  },
+  {
+    "id": "act-ec4c2f",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-15a27df3 for 'Hello' [TRAIN]. Status: pending_review",
+    "timestamp": "2026-10-31T05:31:53.277883",
+    "category": "capture"
+  },
+  {
+    "id": "act-9d6a78",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-a18e7976 for 'Hello' [TRAIN]. Status: pending_review",
+    "timestamp": "2026-10-31T05:31:53.223852",
+    "category": "capture"
+  },
+  {
+    "id": "act-1e8146",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-d24f4e56 for 'Hello' [TRAIN]. Status: pending_review",
+    "timestamp": "2026-10-31T05:31:52.947936",
+    "category": "capture"
+  },
+  {
+    "id": "act-597ecb",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-05c179f0 for 'Hello' [TRAIN]. Status: pending_review",
+    "timestamp": "2026-10-31T05:31:52.911555",
+    "category": "capture"
+  },
+  {
+    "id": "act-09167e",
+    "action": "Sample Approved",
+    "description": "Sample smp-1857908f (Yes) was marked as approved.",
+    "timestamp": "2026-10-31T05:30:34.476849",
+    "category": "review"
+  },
+  {
+    "id": "act-ac8f48",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-1857908f for 'Yes' [TRAIN]. Status: pending_review",
+    "timestamp": "2026-10-31T05:27:19.180252",
+    "category": "capture"
+  },
+  {
+    "id": "act-350240",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-f31b0ddc for 'Hello' [TRAIN]. Status: pending_review",
+    "timestamp": "2026-10-31T05:26:54.308151",
+    "category": "capture"
+  },
+  {
+    "id": "act-36cc44",
+    "action": "Corpus Initialized",
+    "description": "Baseline calibrated gesture landmarks seeded for 5 core classes.",
+    "timestamp": "2026-10-31T05:23:48.687916",
+    "category": "system"
+  },
+  {
+    "id": "act-40727b",
+    "action": "Classes Registered",
+    "description": "Registered 8 sign vocabulary classes across Greetings and Conversational categories.",
+    "timestamp": "2026-10-31T05:23:48.687936",
+    "category": "system"
+  }
+]
