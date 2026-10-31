@@ -31,8 +31,8 @@ import {
 import { drawFullFrameLandmarks } from '../../utils/handRenderer';
 import { useCameraPermissions } from '../../hooks/useCameraPermissions';
 import { CameraPermissionGuardian } from '../camera/CameraPermissionGuardian';
-import { SpeechService } from '../../utils/speech';
-import { getISLTranslation, ISL_TRANSLATIONS } from '../../utils/islDictionary';
+import { SpeechService, SpeechAudioMode } from '../../utils/speech';
+import { getISLTranslation, ISL_TRANSLATIONS, ISLTranslation } from '../../utils/islDictionary';
 
 export const RecognitionView: React.FC = () => {
   const { selectedLanguage, addToast, refreshData } = useApp();
@@ -68,6 +68,7 @@ export const RecognitionView: React.FC = () => {
   const [showPoseLayer, setShowPoseLayer] = useState<boolean>(false);
   const [showFaceLayer, setShowFaceLayer] = useState<boolean>(false);
   const [autoSpeak, setAutoSpeak] = useState<boolean>(true);
+  const [speechMode, setSpeechMode] = useState<SpeechAudioMode>('hindi');
 
   // Model & Recognition results
   const [modelStatus, setModelStatus] = useState<ModelStatus | null>(null);
@@ -223,27 +224,19 @@ export const RecognitionView: React.FC = () => {
       // Add to history and pronounce with Speech Synthesis if recognition is active and valid
       if (res.predicted_sign && res.prediction_state !== 'unknown') {
         const signText = res.predicted_sign;
-        const isl = getISLTranslation(signText);
 
-        // Determine spoken language & text (default to Hindi for ISL)
-        const isISLMode = !selectedLanguage || selectedLanguage === 'ISL';
-        const spokenText = isISLMode && isl ? isl.spokenHindi : signText;
-        const spokenLang = isISLMode ? 'hi-IN' : 'en-US';
-
-        // Auto-Speak if enabled and confirmed
+        // Auto-Speak if enabled and confirmed (pronounces English + Hindi based on speechMode)
         if (autoSpeak && (res.prediction_state === 'stable' || (res.confidence_score || 0) >= 88)) {
-          SpeechService.speak(spokenText, false, spokenLang);
+          SpeechService.speakSign(signText, speechMode, false);
         }
 
-        const displayLabel = isl ? `${isl.hindi} (${isl.english})` : signText;
-
         setHistory((prev) => {
-          if (prev.length > 0 && prev[0].sign === displayLabel) {
+          if (prev.length > 0 && prev[0].sign === signText) {
             return prev;
           }
           return [
             {
-              sign: displayLabel,
+              sign: signText,
               confidence: res.confidence_score,
               state: res.prediction_state as 'stable' | 'provisional',
               stability_score: res.stability_score,
@@ -269,7 +262,7 @@ export const RecognitionView: React.FC = () => {
     } finally {
       isEvaluatingRef.current = false;
     }
-  }, [isCameraActive, isRecognitionRunning, showPoseLayer, showFaceLayer, autoSpeak]);
+  }, [isCameraActive, isRecognitionRunning, showPoseLayer, showFaceLayer, autoSpeak, speechMode]);
 
   // Non-blocking adaptive loop (waits for frame completion to eliminate lag & queue build-up)
   useEffect(() => {
@@ -719,7 +712,19 @@ export const RecognitionView: React.FC = () => {
             compact
             title="Recognition Output"
             actions={
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
+                {/* Speech Audio Mode (Bilingual English + Hindi, Hindi, or English) */}
+                <select
+                  value={speechMode}
+                  onChange={(e) => setSpeechMode(e.target.value as SpeechAudioMode)}
+                  className="text-[10px] font-semibold bg-white border border-slate-300 rounded px-1.5 py-0.5 text-slate-700 focus:outline-none cursor-pointer"
+                  title="Speech Audio Language (ISL Mode)"
+                >
+                  <option value="hindi">Audio: ISL / Hindi (Namaste, Khaana...)</option>
+                  <option value="bilingual">Audio: Bilingual (Hello + Namaste)</option>
+                  <option value="english">Audio: English Only (Hello, Eat...)</option>
+                </select>
+
                 {/* Auto-Speech Toggle */}
                 <button
                   type="button"
@@ -752,41 +757,35 @@ export const RecognitionView: React.FC = () => {
               {liveResult && liveResult.predicted_sign && liveResult.prediction_state !== 'unknown' ? (
                 (() => {
                   const isl = getISLTranslation(liveResult.predicted_sign);
-                  const isISLMode = !selectedLanguage || selectedLanguage === 'ISL';
-                  const primaryText = isISLMode && isl ? isl.hindi : liveResult.predicted_sign;
-                  const subtitle = isl ? `${isl.transliteration} • ${isl.english}` : null;
-                  const spokenText = isISLMode && isl ? isl.spokenHindi : liveResult.predicted_sign;
-                  const spokenLang = isISLMode ? 'hi-IN' : 'en-US';
 
                   return (
                     <div>
-                      <div className="flex items-center justify-center gap-1.5 mb-1.5">
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-400">
-                          {isISLMode ? 'भारतीय सांकेतिक भाषा (ISL)' : 'Recognized Sign / Phrase'}
-                        </span>
-                        {isl && <span className="text-base">{isl.icon}</span>}
-                      </div>
+                      <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
+                        Recognized Sign / Phrase
+                      </span>
 
                       <div className="flex items-center justify-center gap-3">
-                        <div className="text-4xl font-extrabold text-white tracking-tight">
-                          {primaryText}
+                        <div className="text-3xl font-extrabold text-white tracking-tight">
+                          {liveResult.predicted_sign}
                         </div>
 
-                        {/* Pronounce in Hindi / English */}
+                        {/* Pronounce / Speak Button in ISL / Hindi or English */}
                         <button
                           type="button"
-                          onClick={() => SpeechService.speak(spokenText, true, spokenLang)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 active:scale-95 text-white text-xs font-semibold shadow-md shadow-orange-950/60 transition-all cursor-pointer"
-                          title="हिंदी में सुनें (Pronounce in Hindi)"
+                          onClick={() => SpeechService.speakSign(liveResult.predicted_sign!, speechMode, true)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-xs font-semibold shadow-md shadow-indigo-900/60 transition-all cursor-pointer"
+                          title={`Pronounce sign in ${speechMode === 'bilingual' ? 'English & Hindi' : speechMode === 'hindi' ? 'ISL / Hindi' : 'English'}`}
                         >
                           <Volume2 className="w-3.5 h-3.5" />
-                          <span>सुनें (Speak)</span>
+                          <span>
+                            {speechMode === 'hindi' && isl ? `Speak "${isl.spokenPhonetic}"` : speechMode === 'bilingual' ? 'Speak (EN + HI)' : 'Speak'}
+                          </span>
                         </button>
                       </div>
 
-                      {subtitle && (
-                        <div className="text-xs font-medium text-slate-300 mt-1">
-                          {subtitle}
+                      {isl && (
+                        <div className="text-xs font-medium text-amber-300/90 mt-1">
+                          ISL: <span className="font-bold text-amber-200">"{isl.spokenPhonetic}"</span> ({isl.hindi})
                         </div>
                       )}
 
@@ -799,12 +798,12 @@ export const RecognitionView: React.FC = () => {
                               : 'bg-amber-950 border-amber-700 text-amber-400'
                           }`}
                         >
-                          {liveResult.prediction_state === 'stable' ? '✓ निश्चित (Stable)' : 'स्थिर हो रहा है (Stabilizing...)'}
+                          {liveResult.prediction_state === 'stable' ? 'Stable Detection' : 'Provisional (Stabilizing)'}
                         </span>
 
                         {liveResult.confidence_score !== null && (
                           <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-mono text-slate-300">
-                            {liveResult.confidence_score.toFixed(1)}% सटीकता (Confidence)
+                            {liveResult.confidence_score.toFixed(1)}% model match
                           </span>
                         )}
                       </div>
@@ -816,17 +815,17 @@ export const RecognitionView: React.FC = () => {
                   <HelpCircle className="w-8 h-8 text-slate-600 mx-auto mb-2" />
                   <p className="text-sm font-semibold text-slate-300">
                     {!isCameraActive
-                      ? 'कैमरा बंद है (Camera Feed Offline)'
+                      ? 'Camera Feed Offline'
                       : !liveResult?.hand_detected
-                      ? 'कैमरे में हाथ नहीं दिख रहा (No Hand Detected)'
-                      : 'संकेत पहचाना नहीं गया (Unknown Sign Posture)'}
+                      ? 'No Hand Detected in Camera Frame'
+                      : 'Unknown / Ambiguous Sign Posture'}
                   </p>
                   <p className="text-xs text-slate-500 max-w-xs mx-auto mt-1">
                     {!isCameraActive
-                      ? 'संकेत अनुवाद शुरू करने के लिए बाएँ पैनल पर कैमरा शुरू करें।'
+                      ? 'Start the camera on the left panel to begin streaming.'
                       : !liveResult?.hand_detected
-                      ? 'कृपया अपना हाथ कैमरे के सामने स्पष्ट रूप से दिखाएँ।'
-                      : liveResult?.recognition_message || 'हाथ की मुद्रा किसी मान्यता प्राप्त संकेत से मेल नहीं खा रही है।'}
+                      ? 'Position your hand clearly within the camera boundary.'
+                      : liveResult?.recognition_message || 'Movement/posture is below confident recognition threshold.'}
                   </p>
                 </div>
               )}
@@ -835,7 +834,7 @@ export const RecognitionView: React.FC = () => {
             {/* Candidates & Explanatory Reasoning */}
             <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
               <span className="text-[11px] font-semibold text-slate-700 block">
-                संकेत विकल्प एवं सटीकता (Top Candidates)
+                Model Evaluation & Candidates
               </span>
 
               {liveResult && liveResult.alternatives && liveResult.alternatives.length > 0 ? (
@@ -848,8 +847,13 @@ export const RecognitionView: React.FC = () => {
                         className="flex items-center justify-between text-xs p-1.5 rounded bg-slate-50 border border-slate-200"
                       >
                         <span className="font-medium text-slate-800 flex items-center gap-1.5">
-                          <span className="text-slate-400">#{idx + 1}</span>
-                          <span>{altIsl ? `${altIsl.hindi} (${altIsl.english})` : alt.label}</span>
+                          <span className="text-slate-400 font-mono">#{idx + 1}</span>
+                          <span>{alt.label}</span>
+                          {altIsl && (
+                            <span className="text-[11px] text-slate-500 font-normal">
+                              ({altIsl.hindi})
+                            </span>
+                          )}
                         </span>
                         <span className="font-mono text-slate-600 text-[11px]">
                           {alt.confidence.toFixed(1)}%
@@ -860,7 +864,7 @@ export const RecognitionView: React.FC = () => {
                 </div>
               ) : (
                 <p className="text-[11px] text-slate-400 italic">
-                  कोई अन्य विकल्प उपलब्ध नहीं है (No alternatives available).
+                  No alternative candidate scores available for this frame.
                 </p>
               )}
             </div>
@@ -1071,7 +1075,7 @@ export const RecognitionView: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => SpeechService.speak(item.sign, true)}
+                        onClick={() => SpeechService.speakSign(item.sign, speechMode, true)}
                         className="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
                         title={`Pronounce "${item.sign}" out loud`}
                       >
@@ -1124,11 +1128,11 @@ export const RecognitionView: React.FC = () => {
       >
         <div className="space-y-3">
           <p className="text-xs text-slate-600 leading-relaxed">
-            यह प्रणाली <strong>भारतीय सांकेतिक भाषा (ISL)</strong> के लिए विशेष रूप से कैलिब्रेट की गई है। नीचे दिए गए किसी भी संकेत को कैमरे के सामने दिखाएँ, सिस्टम तुरंत उसे <strong>हिंदी और अंग्रेजी</strong> में अनुवाद करेगा और स्पष्ट हिंदी आवाज़ में बोलकर सुनाएगा।
+            Pre-calibrated for <strong>Indian Sign Language (ISL)</strong>. Perform any sign below in front of the camera, and SignBridge will recognize it in real-time and pronounce the authentic ISL word (e.g. <em>Namaste</em>, <em>Khaana</em>, <em>Paani</em>, <em>Theek Hai</em>).
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {Object.values(ISL_TRANSLATIONS).map((item) => (
+            {Object.values(ISL_TRANSLATIONS).map((item: ISLTranslation) => (
               <div
                 key={item.english}
                 className="p-3 rounded-lg border border-slate-200 bg-white hover:border-orange-300 hover:shadow-xs transition-all space-y-2 flex flex-col justify-between"
@@ -1137,15 +1141,15 @@ export const RecognitionView: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-base font-bold text-slate-900 flex items-center gap-1.5">
                       <span>{item.icon}</span>
-                      <span>{item.hindi}</span>
+                      <span>{item.english}</span>
                     </span>
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-orange-50 text-orange-700 border border-orange-200">
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
                       {item.category}
                     </span>
                   </div>
 
-                  <div className="text-[11px] font-semibold text-slate-700 mt-0.5">
-                    {item.transliteration} <span className="font-normal text-slate-400">({item.english})</span>
+                  <div className="text-[11px] font-semibold text-amber-700 mt-0.5">
+                    ISL: <span className="font-bold text-amber-900">"{item.spokenPhonetic}"</span> <span className="font-normal text-slate-400">({item.hindi})</span>
                   </div>
 
                   <p className="text-[11px] text-slate-500 mt-1.5 leading-snug">
@@ -1156,20 +1160,21 @@ export const RecognitionView: React.FC = () => {
                 <div className="flex items-center gap-1.5 pt-2 border-t border-slate-100">
                   <button
                     type="button"
-                    onClick={() => SpeechService.speak(item.spokenHindi, true, 'hi-IN')}
+                    onClick={() => SpeechService.speakSign(item.english, 'hindi', true)}
                     className="flex-1 py-1 rounded bg-orange-50 hover:bg-orange-100 text-orange-800 text-[11px] font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                    title={`Pronounce "${item.spokenPhonetic}" out loud`}
                   >
                     <Volume2 className="w-3.5 h-3.5 text-orange-600" />
-                    <span>सुनें (Listen)</span>
+                    <span>Say "{item.spokenPhonetic}"</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setTeachLabel(item.english)}
                     className="py-1 px-2.5 rounded border border-slate-200 hover:border-indigo-300 text-slate-600 hover:text-slate-900 text-[11px] font-medium cursor-pointer"
-                    title="इस संकेत को सीखें"
+                    title={`Select "${item.english}" for teaching / retraining`}
                   >
-                    चुनें
+                    Select
                   </button>
                 </div>
               </div>

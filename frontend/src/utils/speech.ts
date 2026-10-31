@@ -1,60 +1,127 @@
-// Browser native Web Speech API utility supporting Hindi (ISL) & English pronunciation
+// Browser native Web Speech API utility with robust ISL / Hindi & Bilingual pronunciation
+import { getISLTranslation } from './islDictionary';
+
+export type SpeechAudioMode = 'hindi' | 'bilingual' | 'english';
 
 export class SpeechService {
   private static synth: SpeechSynthesis | null =
     typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null;
-  private static lastSpokenText: string = '';
+  private static cachedVoices: SpeechSynthesisVoice[] = [];
+  private static lastSpokenWord: string = '';
   private static lastSpokenTime: number = 0;
 
-  public static speak(text: string, force: boolean = false, requestedLang: string = 'hi-IN'): boolean {
-    if (!this.synth || !text) return false;
+  // Initialize voice list caching
+  static {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      const updateVoices = () => {
+        try {
+          const list = window.speechSynthesis.getVoices();
+          if (list && list.length > 0) {
+            SpeechService.cachedVoices = list;
+          }
+        } catch {}
+      };
+      updateVoices();
+      if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = updateVoices;
+      }
+    }
+  }
+
+  private static getAvailableVoices(): SpeechSynthesisVoice[] {
+    if (this.cachedVoices.length > 0) return this.cachedVoices;
+    if (this.synth && this.synth.getVoices) {
+      this.cachedVoices = this.synth.getVoices() || [];
+    }
+    return this.cachedVoices;
+  }
+
+  /**
+   * Speak a recognized sign in the desired audio mode.
+   * - 'hindi': Speaks authentic Indian ISL term (e.g. "Namaste", "Khaana", "Paani", "Theek Hai")
+   * - 'bilingual': Speaks combined "Hello, Namaste" / "Eat, Khaana" / "Drink, Paani"
+   * - 'english': Speaks English word ("Hello", "Eat", "Drink")
+   */
+  public static speakSign(
+    englishSign: string,
+    mode: SpeechAudioMode = 'hindi',
+    force: boolean = false
+  ): boolean {
+    if (!this.synth || !englishSign) return false;
 
     const now = Date.now();
-    // Debounce duplicate utterances within 2.2 seconds unless explicitly forced
-    if (!force && text.toLowerCase() === this.lastSpokenText.toLowerCase() && now - this.lastSpokenTime < 2200) {
+    // Debounce duplicate utterances within 2.0 seconds unless explicitly forced by button click
+    if (!force && englishSign.toLowerCase() === this.lastSpokenWord.toLowerCase() && now - this.lastSpokenTime < 2000) {
       return false;
     }
 
     try {
-      this.synth.cancel(); // Cancel any ongoing utterance
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.95;
-      utterance.pitch = 1.0;
-      utterance.volume = 1.0;
+      this.synth.cancel(); // Stop any pending utterance cleanly
 
-      // Detect if text contains Hindi Devanagari characters or requestedLang is Hindi
-      const isHindi = /[\u0900-\u097F]/.test(text) || requestedLang.toLowerCase().startsWith('hi');
+      const isl = getISLTranslation(englishSign);
+      const phoneticHindi = isl?.spokenPhonetic || isl?.transliteration || englishSign;
+      const devanagariHindi = isl?.spokenHindi || phoneticHindi;
 
-      if (isHindi) {
-        utterance.lang = 'hi-IN';
-      } else {
-        utterance.lang = requestedLang || 'en-US';
-      }
+      const voices = this.getAvailableVoices();
 
-      // Select appropriate voice if available in the browser
-      if (this.synth.getVoices) {
-        const voices = this.synth.getVoices();
-        if (isHindi) {
-          const hindiVoice = voices.find(
-            (v) =>
-              v.lang.startsWith('hi') ||
-              v.lang.includes('IN') ||
-              v.name.toLowerCase().includes('hindi') ||
-              v.name.toLowerCase().includes('india')
-          );
-          if (hindiVoice) {
-            utterance.voice = hindiVoice;
-          }
+      // Look for native Hindi voice (e.g. Google हिन्दी, Microsoft Kalpana, hi-IN)
+      const hindiVoice = voices.find(
+        (v) =>
+          v.lang.toLowerCase().startsWith('hi') ||
+          v.name.toLowerCase().includes('hindi')
+      );
+
+      // Look for Indian English voice (e.g. en-IN, Microsoft Heera, Google Indian English)
+      const indianEngVoice = voices.find(
+        (v) =>
+          (v.lang.toLowerCase() === 'en-in' || v.lang.toLowerCase().includes('india')) &&
+          !v.lang.toLowerCase().startsWith('hi')
+      );
+
+      // Fallback English or system default voice
+      const defaultVoice = voices.find((v) => v.lang.toLowerCase().startsWith('en')) || voices[0] || null;
+
+      let utteranceText = '';
+      let targetLang = 'en-US';
+      let targetVoice: SpeechSynthesisVoice | null = null;
+
+      if (mode === 'hindi') {
+        // Speak authentic Indian / ISL phrase: "Namaste", "Khaana", "Paani", "Theek Hai", etc.
+        if (hindiVoice) {
+          utteranceText = devanagariHindi;
+          targetLang = hindiVoice.lang || 'hi-IN';
+          targetVoice = hindiVoice;
         } else {
-          const engVoice = voices.find((v) => v.lang.startsWith('en'));
-          if (engVoice) {
-            utterance.voice = engVoice;
-          }
+          // If no native Hindi voice is installed in OS, speak Romanized phonetic string.
+          // Any voice (US/UK/IN) pronounces "Namaste", "Khaana", "Paani" accurately!
+          utteranceText = phoneticHindi;
+          targetVoice = indianEngVoice || defaultVoice;
+          targetLang = targetVoice?.lang || 'en-IN';
         }
+      } else if (mode === 'bilingual') {
+        // Combined spoken string: e.g. "Hello, Namaste", "Eat, Khaana", "Drink, Paani"
+        utteranceText = `${englishSign}... ${phoneticHindi}`;
+        targetVoice = indianEngVoice || defaultVoice;
+        targetLang = targetVoice?.lang || 'en-IN';
+      } else {
+        // English only: "Hello", "Eat", "Drink"
+        utteranceText = englishSign;
+        targetVoice = defaultVoice;
+        targetLang = targetVoice?.lang || 'en-US';
       }
 
-      this.synth.speak(utterance);
-      this.lastSpokenText = text;
+      const utt = new SpeechSynthesisUtterance(utteranceText);
+      utt.lang = targetLang;
+      utt.rate = 0.95;
+      utt.pitch = 1.0;
+      utt.volume = 1.0;
+      if (targetVoice) {
+        utt.voice = targetVoice;
+      }
+
+      this.synth.speak(utt);
+
+      this.lastSpokenWord = englishSign;
       this.lastSpokenTime = now;
       return true;
     } catch (err) {
@@ -63,13 +130,37 @@ export class SpeechService {
     }
   }
 
+  /**
+   * Directly speak any text string
+   */
+  public static speak(text: string, _force?: boolean): boolean {
+    if (!this.synth || !text) return false;
+    try {
+      this.synth.cancel();
+      const voices = this.getAvailableVoices();
+      const preferredVoice =
+        voices.find((v) => v.lang.toLowerCase().startsWith('hi')) ||
+        voices.find((v) => v.lang.toLowerCase() === 'en-in') ||
+        voices.find((v) => v.lang.toLowerCase().startsWith('en')) ||
+        voices[0] ||
+        null;
+
+      const utt = new SpeechSynthesisUtterance(text);
+      if (preferredVoice) {
+        utt.voice = preferredVoice;
+        utt.lang = preferredVoice.lang;
+      }
+      utt.rate = 0.95;
+      this.synth.speak(utt);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   public static stop() {
     if (this.synth) {
       this.synth.cancel();
     }
-  }
-
-  public static isSupported(): boolean {
-    return typeof window !== 'undefined' && 'speechSynthesis' in window;
   }
 }
