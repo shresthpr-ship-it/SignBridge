@@ -1,8 +1,9 @@
 import React from 'react';
-import { User, Globe } from 'lucide-react';
+import { User, Globe, Camera, Lock } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { StatusIndicator } from '../ui/StatusIndicator';
 import { ActiveTab } from '../../types';
+import { useCameraPermissions } from '../../hooks/useCameraPermissions';
 
 interface PageMeta {
   title: string;
@@ -68,6 +69,7 @@ const PAGE_METADATA: Record<ActiveTab, PageMeta> = {
 export const AppHeader: React.FC = () => {
   const { activeTab, isBackendOnline, selectedLanguage, setSelectedLanguage } = useApp();
   const meta = PAGE_METADATA[activeTab] || PAGE_METADATA.overview;
+  const cameraPermission = useCameraPermissions();
 
   return (
     <header className="h-14 bg-white border-b border-slate-200 px-4 md:px-6 flex items-center justify-between shrink-0 select-none">
@@ -99,6 +101,39 @@ export const AppHeader: React.FC = () => {
               </option>
             ))}
           </select>
+        </div>
+
+        {/* Camera Permission / Context Badge */}
+        <div className="flex items-center pl-2 border-l border-slate-200">
+          {cameraPermission.state === 'granted' ? (
+            <span
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200"
+              title="Camera access granted"
+            >
+              <Camera className="w-3 h-3 text-emerald-600" />
+              <span>Camera Ready</span>
+            </span>
+          ) : cameraPermission.state === 'insecure-context' ? (
+            <button
+              type="button"
+              onClick={cameraPermission.switchToHttps}
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 transition-colors"
+              title="Click to switch to HTTPS for camera access on remote devices"
+            >
+              <Lock className="w-3 h-3 text-amber-600" />
+              <span>Enable HTTPS</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => cameraPermission.requestPermission('user')}
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-colors"
+              title="Request camera permission on this device"
+            >
+              <Camera className="w-3 h-3 text-indigo-600" />
+              <span>Allow Camera</span>
+            </button>
+          )}
         </div>
 
         {/* Backend Connection Status */}

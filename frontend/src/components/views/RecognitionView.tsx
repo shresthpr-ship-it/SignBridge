@@ -13,6 +13,7 @@ import {
   GraduationCap,
   Sparkles,
   CheckCircle,
+  SwitchCamera,
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -26,6 +27,8 @@ import {
   RecognitionHistoryRecord,
 } from '../../types';
 import { drawFullFrameLandmarks } from '../../utils/handRenderer';
+import { useCameraPermissions } from '../../hooks/useCameraPermissions';
+import { CameraPermissionGuardian } from '../camera/CameraPermissionGuardian';
 
 export const RecognitionView: React.FC = () => {
   const { selectedLanguage, addToast, refreshData } = useApp();
@@ -36,6 +39,10 @@ export const RecognitionView: React.FC = () => {
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+
+  // Permission Guardian for cross-device support (HTTPS & Permissions API)
+  const cameraPermission = useCameraPermissions();
 
   // Interactive Teaching / Retraining States
   const [teachLabel, setTeachLabel] = useState<string>('Okay');
@@ -121,13 +128,16 @@ export const RecognitionView: React.FC = () => {
 
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (!cameraPermission.isSecureContext) {
+          throw new Error('Insecure HTTP context. Mobile & remote devices block camera on plain HTTP. Please switch to HTTPS.');
+        }
         throw new Error('MediaDevices API is not available in this browser environment.');
       }
 
       const constraints: MediaStreamConstraints = {
         video: selectedDeviceId
           ? { deviceId: { exact: selectedDeviceId }, width: { ideal: 640 }, height: { ideal: 480 } }
-          : { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+          : { facingMode: facingMode, width: { ideal: 640 }, height: { ideal: 480 } },
         audio: false,
       };
 
@@ -144,7 +154,7 @@ export const RecognitionView: React.FC = () => {
       console.error('Camera initialization failed:', err);
       let msg = 'Failed to access camera.';
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        msg = 'Camera access was denied. Please allow camera permissions in your browser address bar.';
+        msg = 'Camera access was denied. Please tap the lock/info icon in your browser address bar to allow camera access.';
       } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
         msg = 'No video capture hardware / webcam found on this device.';
       } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
@@ -155,6 +165,16 @@ export const RecognitionView: React.FC = () => {
       setCameraError(msg);
     } finally {
       setIsRequestingCamera(false);
+    }
+  };
+
+  // Toggle front/rear camera (useful on phones/tablets)
+  const handleToggleFacingMode = () => {
+    const nextFacing = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(nextFacing);
+    if (isCameraActive) {
+      stopCamera();
+      setTimeout(() => startCamera(), 150);
     }
   };
 
@@ -362,6 +382,12 @@ export const RecognitionView: React.FC = () => {
         </div>
       </div>
 
+      {/* Camera Permission & Network Security Guardian */}
+      <CameraPermissionGuardian
+        permission={cameraPermission}
+        onPermissionGranted={startCamera}
+      />
+
       {/* Main Two-Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* ============================================================ */}
@@ -535,28 +561,40 @@ export const RecognitionView: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Right Controls: Device Selection */}
-                  {videoDevices.length > 1 && (
-                    <div className="flex items-center gap-1.5 text-xs">
-                      <span className="text-[11px] text-slate-500 font-medium">Device:</span>
-                      <select
-                        value={selectedDeviceId}
-                        onChange={(e) => {
-                          setSelectedDeviceId(e.target.value);
-                          if (isCameraActive) {
-                            setTimeout(startCamera, 50);
-                          }
-                        }}
-                        className="text-xs rounded border border-slate-300 bg-white px-2 py-1 text-slate-800"
-                      >
-                        {videoDevices.map((d, i) => (
-                          <option key={d.deviceId || i} value={d.deviceId}>
-                            {d.label || `Camera ${i + 1}`}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
+                  {/* Right Controls: Device Selection & Mobile Camera Flip */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleToggleFacingMode}
+                      title={`Switch to ${facingMode === 'user' ? 'rear' : 'front'} camera`}
+                      leftIcon={<SwitchCamera className="w-3.5 h-3.5" />}
+                    >
+                      <span className="capitalize text-xs">{facingMode} Camera</span>
+                    </Button>
+
+                    {videoDevices.length > 1 && (
+                      <div className="flex items-center gap-1.5 text-xs">
+                        <span className="text-[11px] text-slate-500 font-medium">Device:</span>
+                        <select
+                          value={selectedDeviceId}
+                          onChange={(e) => {
+                            setSelectedDeviceId(e.target.value);
+                            if (isCameraActive) {
+                              setTimeout(startCamera, 50);
+                            }
+                          }}
+                          className="text-xs rounded border border-slate-300 bg-white px-2 py-1 text-slate-800"
+                        >
+                          {videoDevices.map((d, i) => (
+                            <option key={d.deviceId || i} value={d.deviceId}>
+                              {d.label || `Camera ${i + 1}`}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Sub-controls: Overlay Toggles & FPS Limiter */}

@@ -22,6 +22,8 @@ import { Select } from '../ui/Select';
 import { Modal } from '../ui/Modal';
 import { StatusIndicator } from '../ui/StatusIndicator';
 import { api } from '../../services/api';
+import { useCameraPermissions } from '../../hooks/useCameraPermissions';
+import { CameraPermissionGuardian } from '../camera/CameraPermissionGuardian';
 
 export const StudioView: React.FC = () => {
   const { classes, addClass, addToast, refreshData } = useApp();
@@ -38,6 +40,7 @@ export const StudioView: React.FC = () => {
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
+  const cameraPermission = useCameraPermissions();
 
   // Captured still image state
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -116,6 +119,9 @@ export const StudioView: React.FC = () => {
 
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (!cameraPermission.isSecureContext) {
+          throw new Error('Insecure HTTP context. Mobile & remote devices block camera on plain HTTP. Please switch to HTTPS.');
+        }
         throw new Error('MediaDevices API is not supported in this browser environment.');
       }
 
@@ -369,6 +375,12 @@ export const StudioView: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* Camera Permission & Network Security Guardian */}
+      <CameraPermissionGuardian
+        permission={cameraPermission}
+        onPermissionGranted={startCamera}
+      />
 
       {/* Main Studio Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
