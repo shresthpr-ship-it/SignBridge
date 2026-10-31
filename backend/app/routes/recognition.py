@@ -4,9 +4,9 @@ from typing import List, Dict, Any, Optional
 
 import cv2
 import numpy as np
-from fastapi import APIRouter, UploadFile, File, Query, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, Query, HTTPException
 
-from app.models import RecognitionRequest, RecognitionResponse, LandmarkPoint
+from app.models import RecognitionRequest, RecognitionResponse, LandmarkPoint, TeachGestureRequest
 from app.services.recognizer_service import recognizer_service
 from app.services.recognition_service import recognition_service
 from app.services.vision_pipeline import vision_pipeline
@@ -304,3 +304,131 @@ async def train_model():
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Training failed: {str(e)}")
+
+
+@router.post("/teach")
+async def teach_gesture(req: TeachGestureRequest):
+    """
+    Teach the recognition model a gesture directly using landmark points.
+    Creates sample variations and automatically updates the MLP classifier in real-time.
+    """
+    import random
+    from app.services.dataset_service import dataset_service
+
+    if not req.label.strip():
+        raise HTTPException(status_code=400, detail="Gesture label cannot be empty")
+    if len(req.landmarks) < 21:
+        raise HTTPException(status_code=400, detail="Must provide at least 21 3D landmark points")
+
+    clean_label = req.label.strip()
+    dataset_service.add_class(name=clean_label, category="Taught", description=f"Taught gesture for {req.language}")
+
+    # Add primary sample
+    raw_pts = [p.model_dump() for p in req.landmarks]
+    dataset_service.add_sample(
+        label=clean_label,
+        landmarks=raw_pts,
+        split="train",
+        notes=req.notes or "Interactive teaching primary sample",
+        device_info="webcam-live-teach",
+        review_status="approved",
+        quality_score=0.98
+    )
+
+    # Generate slight jitter variations so new gesture has immediate robust support
+    count = max(4, min(req.samples_count, 15))
+    for i in range(count - 1):
+        jittered = []
+        for p in req.landmarks:
+            jittered.append({
+                "x": round(p.x + random.uniform(-0.012, 0.012), 4),
+                "y": round(p.y + random.uniform(-0.012, 0.012), 4),
+                "z": round((p.z or 0.0) + random.uniform(-0.005, 0.005), 4),
+                "visibility": 1.0
+            })
+        dataset_service.add_sample(
+            label=clean_label,
+            landmarks=jittered,
+            split="train" if i < count - 2 else "test",
+            notes=f"Taught variation {i+1}",
+            device_info="webcam-live-teach-jitter",
+            review_status="approved",
+            quality_score=0.96
+        )
+
+    dataset_service.log_activity(
+        "Gesture Taught",
+        f"User taught gesture '{clean_label}' with {count} sample variations in {req.language}.",
+        "system"
+    )
+
+    training_result = None
+    if req.auto_train:
+        try:
+            training_result = await train_model()
+        except Exception as e:
+            print(f"[TeachGesture] Retraining warning: {e}")
+
+    return {
+        "status": "success",
+        "label": clean_label,
+        "language": req.language,
+        "samples_added": count,
+        "model_retrained": training_result is not None,
+        "train_accuracy": training_result.get("train_accuracy") if training_result else None,
+        "test_accuracy": training_result.get("test_accuracy") if training_result else None,
+        "classes": training_result.get("classes") if training_result else [],
+        "message": f"Successfully taught '{clean_label}'! {count} samples integrated and model updated."
+    }
+
+
+@router.post("/teach-frame")
+async def teach_from_frame(
+    file: UploadFile = File(..., description="Camera frame JPEG/PNG with visible gesture"),
+    label: str = Form(..., description="What this gesture means (e.g. Okay, Hello)"),
+    language: str = Form("ASL", description="Sign language code"),
+):
+    """
+    Accepts an actual webcam frame image, extracts 3D landmarks with MediaPipe,
+    and immediately teaches the classifier the new gesture.
+    """
+    if not label.strip():
+        raise HTTPException(status_code=400, detail="Gesture label cannot be empty")
+
+    file_bytes = await file.read()
+    if not file_bytes:
+        raise HTTPException(status_code=400, detail="Captured frame is empty")
+
+    np_arr = np.frombuffer(file_bytes, np.uint8)
+    bgr_img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+    if bgr_img is None:
+        raise HTTPException(status_code=400, detail="Failed to decode webcam frame")
+
+    rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
+    frame_data = vision_pipeline._extract_frame_landmarks(rgb_img, frame_idx=0, timestamp_ms=0.0)
+
+    if not frame_data.hands or len(frame_data.hands[0].landmarks) < 21:
+        raise HTTPException(
+            status_code=422,
+            detail="No hand detected in the camera frame. Please position your hand clearly in view and try again."
+        )
+
+    pts = [
+        LandmarkPoint(
+            x=p.x,
+            y=p.y,
+            z=p.z,
+            visibility=p.visibility if p.visibility is not None else 1.0
+        )
+        for p in frame_data.hands[0].landmarks
+    ]
+
+    teach_req = TeachGestureRequest(
+        label=label.strip(),
+        language=language.strip(),
+        landmarks=pts,
+        samples_count=8,
+        notes=f"Taught from live frame ({frame_data.hands[0].handedness} hand)"
+    )
+
+    return await teach_gesture(teach_req)

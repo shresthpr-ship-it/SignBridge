@@ -19,6 +19,8 @@ interface AppContextType {
   systemInfo: SystemInfo | null;
   activeTab: ActiveTab;
   setActiveTab: (tab: ActiveTab) => void;
+  selectedLanguage: string;
+  setSelectedLanguage: (lang: string) => void;
   selectedSign: string;
   setSelectedSign: (sign: string) => void;
   selectedSplit: 'train' | 'val' | 'test';
@@ -45,6 +47,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activities, setActivities] = useState<ActivityLogItem[]>([]);
   const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
+  const [selectedLanguage, setSelectedLanguage] = useState<string>(() => {
+    return localStorage.getItem('signbridge_selected_language') || 'ASL';
+  });
   const [selectedSign, setSelectedSign] = useState<string>('Hello');
   const [selectedSplit, setSelectedSplit] = useState<'train' | 'val' | 'test'>('train');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -215,6 +220,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const handleSetLanguage = (lang: string) => {
+    setSelectedLanguage(lang);
+    localStorage.setItem('signbridge_selected_language', lang);
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -225,6 +235,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         systemInfo,
         activeTab,
         setActiveTab,
+        selectedLanguage,
+        setSelectedLanguage: handleSetLanguage,
         selectedSign,
         setSelectedSign,
         selectedSplit,

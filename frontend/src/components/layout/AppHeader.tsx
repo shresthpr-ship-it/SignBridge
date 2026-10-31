@@ -1,5 +1,5 @@
 import React from 'react';
-import { User } from 'lucide-react';
+import { User, Globe } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { StatusIndicator } from '../ui/StatusIndicator';
 import { ActiveTab } from '../../types';
@@ -8,6 +8,15 @@ interface PageMeta {
   title: string;
   description: string;
 }
+
+const PRESET_LANGUAGES = [
+  { code: 'ASL', name: 'ASL (American)' },
+  { code: 'ISL', name: 'ISL (Indian)' },
+  { code: 'BSL', name: 'BSL (British)' },
+  { code: 'AUSLAN', name: 'AUSLAN (Australian)' },
+  { code: 'LSF', name: 'LSF (French)' },
+  { code: 'CUSTOM', name: 'Custom Vocabulary' },
+];
 
 const PAGE_METADATA: Record<ActiveTab, PageMeta> = {
   overview: {
@@ -57,7 +66,7 @@ const PAGE_METADATA: Record<ActiveTab, PageMeta> = {
 };
 
 export const AppHeader: React.FC = () => {
-  const { activeTab, isBackendOnline } = useApp();
+  const { activeTab, isBackendOnline, selectedLanguage, setSelectedLanguage } = useApp();
   const meta = PAGE_METADATA[activeTab] || PAGE_METADATA.overview;
 
   return (
@@ -72,13 +81,31 @@ export const AppHeader: React.FC = () => {
         </p>
       </div>
 
-      {/* Right Controls: Backend Status & User Profile Placeholder */}
-      <div className="flex items-center gap-4">
+      {/* Right Controls: Sign Language Selector, Backend Status & User Profile */}
+      <div className="flex items-center gap-3">
+        {/* Pre-available Sign Language Selector */}
+        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-md">
+          <Globe className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+          <span className="text-[10px] uppercase font-bold text-slate-400">Lang:</span>
+          <select
+            value={selectedLanguage}
+            onChange={(e) => setSelectedLanguage(e.target.value)}
+            className="text-xs font-semibold bg-transparent text-slate-800 focus:outline-none cursor-pointer"
+            title="Active Sign Language System"
+          >
+            {PRESET_LANGUAGES.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* Backend Connection Status */}
-        <div className="flex items-center gap-2 pl-3 border-l sm:border-l-0 border-slate-200">
+        <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
           <StatusIndicator
             status={isBackendOnline ? 'operational' : 'offline'}
-            label={isBackendOnline ? 'Connected' : 'Disconnected'}
+            label={isBackendOnline ? 'Online' : 'Offline'}
             pulse={isBackendOnline}
           />
         </div>

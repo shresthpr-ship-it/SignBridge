@@ -230,6 +230,18 @@ export interface ExportResult {
   status: string;
 }
 
+export interface TeachGestureResponse {
+  status: string;
+  label: string;
+  language: string;
+  samples_added: number;
+  model_retrained: boolean;
+  train_accuracy?: number | null;
+  test_accuracy?: number | null;
+  classes: string[];
+  message: string;
+}
+
 export interface LiveFrameRecognitionResponse {
   landmark_detection_status: 'detected' | 'partial_detection' | 'no_landmarks_detected';
   hand_detected: boolean;

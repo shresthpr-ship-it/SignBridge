@@ -10,6 +10,7 @@ class LandmarkPoint(BaseModel):
 class SignClass(BaseModel):
     id: str
     name: str
+    language: str = "ASL"
     category: str = "General"  # e.g., "Greetings", "Alphabet", "Emergency", "Conversational"
     description: str = ""
     sample_count: int = 0
@@ -17,8 +18,17 @@ class SignClass(BaseModel):
 
 class CreateSignClassRequest(BaseModel):
     name: str
+    language: str = "ASL"
     category: str = "General"
     description: str = ""
+
+class TeachGestureRequest(BaseModel):
+    label: str
+    language: str = "ASL"
+    landmarks: List[LandmarkPoint]
+    samples_count: int = 8
+    notes: Optional[str] = "Interactive webcam training sample"
+    auto_train: bool = True
 
 class SignSample(BaseModel):
     id: str

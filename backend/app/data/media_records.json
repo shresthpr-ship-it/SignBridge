@@ -1,5 +1,33 @@
 [
   {
+    "id": "med-7ed00bd1",
+    "media_type": "image",
+    "sign_language": "ASL",
+    "sign_label": "Peace",
+    "description": "Peace",
+    "signer_id": "signer_o2a0",
+    "consent_confirmed": true,
+    "filename": "med-7ed00bd1.png",
+    "file_url": "/media/images/med-7ed00bd1.png",
+    "file_size_bytes": 1025357,
+    "split": "train",
+    "created_at": "2026-10-31T08:36:26.224149"
+  },
+  {
+    "id": "med-dbfb2147",
+    "media_type": "image",
+    "sign_language": "ASL",
+    "sign_label": "Yes",
+    "description": "",
+    "signer_id": "signer_vslq",
+    "consent_confirmed": true,
+    "filename": "med-dbfb2147.png",
+    "file_url": "/media/images/med-dbfb2147.png",
+    "file_size_bytes": 1106416,
+    "split": "train",
+    "created_at": "2026-10-31T08:32:06.580217"
+  },
+  {
     "id": "med-eaca9f1c",
     "media_type": "image",
     "sign_language": "ASL",

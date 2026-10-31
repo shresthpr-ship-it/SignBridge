@@ -4,7 +4,7 @@
     "name": "Hello",
     "category": "Greetings",
     "description": "Open hand waving or steady palm facing forward.",
-    "sample_count": 16,
+    "sample_count": 12,
     "created_at": "2026-10-30T19:03:30.901844"
   },
   {
@@ -12,7 +12,7 @@
     "name": "Thank You",
     "category": "Greetings",
     "description": "Flat hand moving forward from chin or mouth.",
-    "sample_count": 2,
+    "sample_count": 12,
     "created_at": "2026-10-30T19:03:30.901865"
   },
   {
@@ -20,7 +20,7 @@
     "name": "Yes",
     "category": "Responses",
     "description": "Upward thumb gesture or nodding fist.",
-    "sample_count": 5,
+    "sample_count": 22,
     "created_at": "2026-10-30T19:03:30.901869"
   },
   {
@@ -28,7 +28,7 @@
     "name": "No",
     "category": "Responses",
     "description": "Fist or index and middle snapping to thumb.",
-    "sample_count": 5,
+    "sample_count": 22,
     "created_at": "2026-10-30T19:03:30.901873"
   },
   {
@@ -36,7 +36,7 @@
     "name": "Peace",
     "category": "Conversational",
     "description": "Index and middle fingers forming a clear V sign.",
-    "sample_count": 5,
+    "sample_count": 12,
     "created_at": "2026-10-30T19:03:30.901877"
   },
   {
@@ -44,7 +44,7 @@
     "name": "I Love You",
     "category": "Conversational",
     "description": "Thumb, index, and pinky extended upward.",
-    "sample_count": 5,
+    "sample_count": 12,
     "created_at": "2026-10-30T19:03:30.901881"
   },
   {
@@ -52,7 +52,7 @@
     "name": "Help",
     "category": "Emergency",
     "description": "Thumbs-up resting atop flat open palm.",
-    "sample_count": 5,
+    "sample_count": 14,
     "created_at": "2026-10-30T19:03:30.901937"
   },
   {
@@ -60,7 +60,7 @@
     "name": "Water",
     "category": "Essentials",
     "description": "W-handshape tapped near mouth.",
-    "sample_count": 3,
+    "sample_count": 0,
     "created_at": "2026-10-30T19:03:30.901941"
   },
   {
@@ -70,5 +70,130 @@
     "description": "",
     "sample_count": 0,
     "created_at": "2026-10-31T08:21:10.602060"
+  },
+  {
+    "id": "cls-20fb616d",
+    "name": "Okay",
+    "language": "ASL",
+    "category": "Conversational",
+    "description": "Thumb and index tips touching to form a circular O, middle, ring, pinky extended upward.",
+    "sample_count": 35,
+    "created_at": "2026-10-31T08:47:15.937353+00:00"
+  },
+  {
+    "id": "cls-00d046c6",
+    "name": "Stop",
+    "language": "ASL",
+    "category": "Actions",
+    "description": "Open palm extended vertically facing forward.",
+    "sample_count": 0,
+    "created_at": "2026-10-31T08:47:15.937376+00:00"
+  },
+  {
+    "id": "cls-25fc6209",
+    "name": "Point",
+    "language": "ASL",
+    "category": "Numbers",
+    "description": "Index finger pointing up, others curled in fist.",
+    "sample_count": 12,
+    "created_at": "2026-10-31T08:47:15.937382+00:00"
+  },
+  {
+    "id": "cls-013f0590",
+    "name": "Namaste",
+    "language": "ISL",
+    "category": "Greetings",
+    "description": "Formal greeting with upright palm or hands near chest.",
+    "sample_count": 0,
+    "created_at": "2026-10-31T08:47:15.937386+00:00"
+  },
+  {
+    "id": "cls-b639c2b8",
+    "name": "Theek Hai (Okay)",
+    "language": "ISL",
+    "category": "Conversational",
+    "description": "Standard OK handshape indicating agreement.",
+    "sample_count": 0,
+    "created_at": "2026-10-31T08:47:15.937390+00:00"
+  },
+  {
+    "id": "cls-e9f184ef",
+    "name": "Haan (Yes)",
+    "language": "ISL",
+    "category": "Responses",
+    "description": "Affirmative thumb up gesture.",
+    "sample_count": 0,
+    "created_at": "2026-10-31T08:47:15.937393+00:00"
+  },
+  {
+    "id": "cls-059025aa",
+    "name": "Nahi (No)",
+    "language": "ISL",
+    "category": "Responses",
+    "description": "Negative fist shake or closed hand.",
+    "sample_count": 0,
+    "created_at": "2026-10-31T08:47:15.937397+00:00"
+  },
+  {
+    "id": "cls-65adee79",
+    "name": "Shukriya",
+    "language": "ISL",
+    "category": "Greetings",
+    "description": "Thank you gesture from chin.",
+    "sample_count": 0,
+    "created_at": "2026-10-31T08:47:15.937400+00:00"
+  },
+  {
+    "id": "cls-66837130",
+    "name": "Madad (Help)",
+    "language": "ISL",
+    "category": "Emergency",
+    "description": "Supportive fist on palm for emergency.",
+    "sample_count": 0,
+    "created_at": "2026-10-31T08:47:15.937404+00:00"
+  },
+  {
+    "id": "cls-701db8f7",
+    "name": "Cheers",
+    "language": "BSL",
+    "category": "Greetings",
+    "description": "Thumbs-up or casual thank you handshape.",
+    "sample_count": 0,
+    "created_at": "2026-10-31T08:47:15.937407+00:00"
+  },
+  {
+    "id": "cls-c5a0b8cc",
+    "name": "BSL Okay",
+    "language": "BSL",
+    "category": "Conversational",
+    "description": "OK ring handshape indicating confirmation.",
+    "sample_count": 0,
+    "created_at": "2026-10-31T08:47:15.937411+00:00"
+  },
+  {
+    "id": "cls-48f0374f",
+    "name": "Bonjour",
+    "language": "LSF",
+    "category": "Greetings",
+    "description": "Hand moving from chin forward.",
+    "sample_count": 0,
+    "created_at": "2026-10-31T08:47:15.937413+00:00"
+  },
+  {
+    "id": "cls-8166014a",
+    "name": "D'accord (Okay)",
+    "language": "LSF",
+    "category": "Conversational",
+    "description": "Index and thumb circle with fingers up.",
+    "sample_count": 0,
+    "created_at": "2026-10-31T08:47:15.937416+00:00"
+  },
+  {
+    "id": "cls-456c4aaa",
+    "name": "Fist",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T08:50:17.017548"
   }
 ]

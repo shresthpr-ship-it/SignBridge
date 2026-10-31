@@ -10,11 +10,15 @@ import {
   Info,
   HelpCircle,
   RotateCcw,
+  GraduationCap,
+  Sparkles,
+  CheckCircle,
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { StatusIndicator } from '../ui/StatusIndicator';
+import { useApp } from '../../context/AppContext';
 import { api } from '../../services/api';
 import {
   LiveFrameRecognitionResponse,
@@ -24,12 +28,27 @@ import {
 import { drawFullFrameLandmarks } from '../../utils/handRenderer';
 
 export const RecognitionView: React.FC = () => {
+  const { selectedLanguage, addToast, refreshData } = useApp();
+
   // Camera & Stream states
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
   const [isRequestingCamera, setIsRequestingCamera] = useState<boolean>(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
+
+  // Interactive Teaching / Retraining States
+  const [teachLabel, setTeachLabel] = useState<string>('Okay');
+  const [teachLanguage, setTeachLanguage] = useState<string>(selectedLanguage || 'ASL');
+  const [isTeaching, setIsTeaching] = useState<boolean>(false);
+  const [teachSuccessMsg, setTeachSuccessMsg] = useState<string | null>(null);
+
+  // Sync with global language selector
+  useEffect(() => {
+    if (selectedLanguage) {
+      setTeachLanguage(selectedLanguage);
+    }
+  }, [selectedLanguage]);
 
   // Recognition loop states
   const [isRecognitionRunning, setIsRecognitionRunning] = useState<boolean>(true);
@@ -240,6 +259,72 @@ export const RecognitionView: React.FC = () => {
       showFace: showFaceLayer,
     });
   }, [liveResult, showOverlay, showPoseLayer, showFaceLayer]);
+
+  // Interactive Teaching Action: Learn the gesture from current webcam frame
+  const handleTeachGesture = async (customLabel?: string) => {
+    const labelToTeach = (customLabel || teachLabel).trim();
+    if (!labelToTeach) {
+      addToast({
+        type: 'warning',
+        title: 'Sign Label Required',
+        message: 'Please specify or select a sign label name (e.g. "Okay").',
+      });
+      return;
+    }
+
+    if (!videoRef.current || !isCameraActive) {
+      addToast({
+        type: 'warning',
+        title: 'Camera Offline',
+        message: 'Please start the camera and display your hand gesture to teach.',
+      });
+      return;
+    }
+
+    setIsTeaching(true);
+    setTeachSuccessMsg(null);
+
+    try {
+      const video = videoRef.current;
+      const offscreen = document.createElement('canvas');
+      offscreen.width = video.videoWidth || 640;
+      offscreen.height = video.videoHeight || 480;
+      const ctx = offscreen.getContext('2d');
+      if (!ctx) throw new Error('Canvas rendering context not available');
+
+      ctx.drawImage(video, 0, 0, offscreen.width, offscreen.height);
+
+      const blob: Blob | null = await new Promise((resolve) =>
+        offscreen.toBlob(resolve, 'image/jpeg', 0.9)
+      );
+
+      if (!blob) throw new Error('Failed to encode camera frame');
+
+      const res = await api.teachFromFrame(blob, labelToTeach, teachLanguage);
+
+      const msg = `Learned "${labelToTeach}" (${teachLanguage})! Model retrained with ${res.samples_added} new samples.`;
+      setTeachSuccessMsg(msg);
+      addToast({
+        type: 'success',
+        title: 'Gesture Taught Successfully',
+        message: `Model updated with "${labelToTeach}". You can now hold up your hand to see it recognized!`,
+      });
+
+      // Update model status
+      const updatedModelStatus = await api.getRecognitionModelStatus();
+      setModelStatus(updatedModelStatus);
+      await refreshData();
+    } catch (err: any) {
+      console.error('Teach gesture error:', err);
+      addToast({
+        type: 'error',
+        title: 'Teaching Failed',
+        message: err.message || 'Could not extract hand landmarks. Ensure hand is clearly in view.',
+      });
+    } finally {
+      setIsTeaching(false);
+    }
+  };
 
   // Reset session
   const handleResetSession = async () => {
@@ -642,6 +727,127 @@ export const RecognitionView: React.FC = () => {
                   No alternative candidate scores available for this frame.
                 </p>
               )}
+            </div>
+          </Card>
+
+          {/* Interactive Teach & Instant Retraining Card */}
+          <Card
+            compact
+            title="Teach This Sign / Correct Gesture"
+            className="border-indigo-200 bg-indigo-50/20"
+          >
+            <div className="space-y-3 text-xs">
+              <p className="text-[11px] text-slate-600 leading-relaxed">
+                If the model translates a gesture incorrectly (or you want to teach a new gesture like <strong>"Okay"</strong>), show the gesture to the camera, type or select its name below, and click <strong>Teach & Update Model</strong>.
+              </p>
+
+              {/* Hand Detection Readiness Status */}
+              <div className="flex items-center justify-between p-2 rounded bg-white border border-slate-200">
+                <span className="text-[11px] text-slate-600 font-medium">Hand Sensor Status:</span>
+                <span className={`inline-flex items-center gap-1 font-semibold text-[11px] ${
+                  liveResult?.hand_detected ? 'text-emerald-700' : 'text-amber-700'
+                }`}>
+                  <span className={`w-2 h-2 rounded-full ${
+                    liveResult?.hand_detected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'
+                  }`} />
+                  {liveResult?.hand_detected ? 'Hand In View (21 landmarks ready)' : 'Show Hand to Camera'}
+                </span>
+              </div>
+
+              {/* Quick Preset Gesture Chips */}
+              <div>
+                <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
+                  Quick Select Sign:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    'Okay',
+                    'Hello',
+                    'Thank You',
+                    'Peace',
+                    'Yes',
+                    'No',
+                    'I Love You',
+                    'Stop',
+                    'Point',
+                    'Help',
+                  ].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setTeachLabel(preset)}
+                      className={`px-2 py-0.5 rounded text-[11px] font-medium border transition-colors ${
+                        teachLabel.toLowerCase() === preset.toLowerCase()
+                          ? 'bg-indigo-600 text-white border-indigo-600'
+                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom Sign Name & Language Inputs */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="sm:col-span-2">
+                  <label className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                    Sign Label Name:
+                  </label>
+                  <input
+                    type="text"
+                    value={teachLabel}
+                    onChange={(e) => setTeachLabel(e.target.value)}
+                    placeholder="e.g. Okay, Thumbs Up"
+                    className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                    Language:
+                  </label>
+                  <select
+                    value={teachLanguage}
+                    onChange={(e) => setTeachLanguage(e.target.value)}
+                    className="w-full px-2 py-1.5 text-xs bg-white border border-slate-200 rounded font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  >
+                    <option value="ASL">ASL</option>
+                    <option value="ISL">ISL (Indian)</option>
+                    <option value="BSL">BSL (British)</option>
+                    <option value="AUSLAN">AUSLAN</option>
+                    <option value="LSF">LSF (French)</option>
+                    <option value="CUSTOM">Custom</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Success Banner if retrained */}
+              {teachSuccessMsg && (
+                <div className="p-2 bg-emerald-50 border border-emerald-200 rounded text-emerald-800 text-[11px] flex items-center gap-1.5">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>{teachSuccessMsg}</span>
+                </div>
+              )}
+
+              {/* Action Button: Teach & Retrain */}
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => handleTeachGesture()}
+                disabled={isTeaching || !isCameraActive || !liveResult?.hand_detected}
+                className="w-full"
+                leftIcon={
+                  isTeaching ? (
+                    <Sparkles className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <GraduationCap className="w-3.5 h-3.5" />
+                  )
+                }
+              >
+                {isTeaching
+                  ? 'Capturing & Retraining Model (<1s)...'
+                  : `Teach "${teachLabel}" & Update Model`}
+              </Button>
             </div>
           </Card>
 

@@ -15,11 +15,12 @@ export const LabelManagementView: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [languageFilter, setLanguageFilter] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<SignClass | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  const [createForm, setCreateForm] = useState({ name: '', category: 'General', description: '' });
+  const [createForm, setCreateForm] = useState({ name: '', language: 'ASL', category: 'General', description: '' });
   const [createError, setCreateError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
@@ -43,9 +44,10 @@ export const LabelManagementView: React.FC = () => {
       const q = searchQuery.toLowerCase();
       const matchesSearch = !q || c.name.toLowerCase().includes(q) || c.description?.toLowerCase().includes(q);
       const matchesCat = !categoryFilter || c.category === categoryFilter;
-      return matchesSearch && matchesCat;
+      const matchesLang = !languageFilter || (c as any).language === languageFilter;
+      return matchesSearch && matchesCat && matchesLang;
     });
-  }, [classes, searchQuery, categoryFilter]);
+  }, [classes, searchQuery, categoryFilter, languageFilter]);
 
   const handleCreate = async () => {
     if (!createForm.name.trim()) {
@@ -62,7 +64,7 @@ export const LabelManagementView: React.FC = () => {
       await api.createClass(createForm.name.trim(), createForm.category, createForm.description.trim());
       setSuccessMsg(`Label "${createForm.name}" created successfully.`);
       setShowCreateModal(false);
-      setCreateForm({ name: '', category: 'General', description: '' });
+      setCreateForm({ name: '', language: 'ASL', category: 'General', description: '' });
       await loadClasses();
       setTimeout(() => setSuccessMsg(null), 3000);
     } catch (e: any) {
@@ -108,7 +110,7 @@ export const LabelManagementView: React.FC = () => {
           variant="primary"
           size="sm"
           leftIcon={<Plus className="w-4 h-4" />}
-          onClick={() => { setShowCreateModal(true); setCreateError(null); setCreateForm({ name: '', category: 'General', description: '' }); }}
+          onClick={() => { setShowCreateModal(true); setCreateError(null); setCreateForm({ name: '', language: 'ASL', category: 'General', description: '' }); }}
         >
           New Label
         </Button>
@@ -145,6 +147,19 @@ export const LabelManagementView: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-slate-400" />
+          <select
+            value={languageFilter}
+            onChange={e => setLanguageFilter(e.target.value)}
+            className="text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+          >
+            <option value="">All Languages</option>
+            <option value="ASL">ASL (American)</option>
+            <option value="ISL">ISL (Indian)</option>
+            <option value="BSL">BSL (British)</option>
+            <option value="AUSLAN">AUSLAN</option>
+            <option value="LSF">LSF (French)</option>
+            <option value="CUSTOM">Custom</option>
+          </select>
           <select
             value={categoryFilter}
             onChange={e => setCategoryFilter(e.target.value)}
@@ -193,6 +208,7 @@ export const LabelManagementView: React.FC = () => {
               <thead>
                 <tr className="border-b border-slate-100">
                   <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide pb-3 pr-4">Label</th>
+                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide pb-3 pr-4">Language</th>
                   <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide pb-3 pr-4">Category</th>
                   <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wide pb-3 pr-4">Samples</th>
                   <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide pb-3 pr-4">Description</th>
@@ -211,6 +227,9 @@ export const LabelManagementView: React.FC = () => {
                             <span className="text-[10px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded font-semibold">READY</span>
                           )}
                         </div>
+                      </td>
+                      <td className="py-3 pr-4">
+                        <Badge variant="indigo" size="sm">{(cls as any).language || 'ASL'}</Badge>
                       </td>
                       <td className="py-3 pr-4">
                         <Badge variant="slate" size="sm">{cls.category || 'General'}</Badge>

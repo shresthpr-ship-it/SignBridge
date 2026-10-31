@@ -16,6 +16,7 @@ import {
   TrainingStatus,
   TrainingResult,
   ExportResult,
+  TeachGestureResponse,
 } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -268,6 +269,43 @@ class ApiService {
 
   async trainModel(): Promise<TrainingResult> {
     return this.request('/recognition/train', { method: 'POST' });
+  }
+
+  // Interactive Gesture Teaching
+  async teachGesture(data: {
+    label: string;
+    language?: string;
+    landmarks: LandmarkPoint[];
+    samples_count?: number;
+    notes?: string;
+    auto_train?: boolean;
+  }): Promise<TeachGestureResponse> {
+    return this.request('/recognition/teach', {
+      method: 'POST',
+      body: JSON.stringify({
+        language: 'ASL',
+        samples_count: 8,
+        auto_train: true,
+        ...data,
+      }),
+    });
+  }
+
+  async teachFromFrame(frameBlob: Blob, label: string, language: string = 'ASL'): Promise<TeachGestureResponse> {
+    const formData = new FormData();
+    formData.append('file', frameBlob, 'teach_frame.jpg');
+    formData.append('label', label);
+    formData.append('language', language);
+    const url = `${BASE_URL}/recognition/teach-frame`;
+    const response = await fetch(url, {
+      method: 'POST',
+      body: formData,
+    });
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => ({ detail: response.statusText }));
+      throw new Error(errorBody.detail || `Teaching failed with status ${response.status}`);
+    }
+    return await response.json();
   }
 }
 
