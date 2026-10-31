@@ -232,7 +232,15 @@ class SignRecognitionInferenceService:
         has_pretrained = self._pretrained_model_path is not None and not has_sklearn
         has_prototypes = len(dataset_service.get_samples()) > 0
 
-        capabilities = ["landmark_detection_3d"]
+        capabilities = [
+            "landmark_detection_3d",
+            "isolated_sign_recognition",
+            "continuous_sign_recognition",
+            "temporal_feature_buffer",
+            "motion_energy_estimation",
+            "sentence_generation_isl_english",
+            "discourse_grammar_smoothing",
+        ]
         if has_sklearn:
             capabilities.append("trained_mlp_classifier")
         if has_prototypes:
@@ -241,9 +249,9 @@ class SignRecognitionInferenceService:
             capabilities.append("pretrained_model_inference")
 
         limitations = [
-            "movement_sequence_model_required_for_dynamic_signs",
-            "continuous_translation_grammar_unsupported",
-            "facial_non_manual_grammar_not_modeled"
+            "continuous_vocabulary_scoped_to_calibrated_sign_classes",
+            "sentence_translation_uses_discourse_grammar_and_idiomatic_patterns",
+            "facial_non_manual_markers_partially_captured"
         ]
 
         classes_list = []
@@ -515,6 +523,11 @@ class SignRecognitionInferenceService:
 
     def reset_temporal_window(self):
         self.temporal_buffer.clear()
+        try:
+            from app.services.continuous_recognition_service import continuous_recognizer
+            continuous_recognizer.reset_session()
+        except Exception:
+            pass
 
 
 recognition_service = SignRecognitionInferenceService()

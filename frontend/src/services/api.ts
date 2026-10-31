@@ -17,6 +17,9 @@ import {
   TrainingResult,
   ExportResult,
   TeachGestureResponse,
+  SignToken,
+  GeneratedSentence,
+  ContinuousSessionState,
 } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -311,6 +314,41 @@ class ApiService {
       throw new Error(errorBody.detail || `Teaching failed with status ${response.status}`);
     }
     return await response.json();
+  }
+
+  // Continuous Sign Recognition & Sentence Generation
+  async getContinuousSession(): Promise<ContinuousSessionState> {
+    return this.request('/recognition/continuous-session');
+  }
+
+  async resetContinuousSession(): Promise<{ status: string; timestamp: string }> {
+    return this.request('/recognition/continuous-session/reset', { method: 'POST' });
+  }
+
+  async removeContinuousToken(): Promise<{
+    status: string;
+    removed_token?: SignToken;
+    snapshot: ContinuousSessionState;
+  }> {
+    return this.request('/recognition/continuous-session/remove-token', { method: 'POST' });
+  }
+
+  async addContinuousToken(sign: string, confidence: number = 95.0): Promise<{
+    status: string;
+    token: SignToken;
+    snapshot: ContinuousSessionState;
+  }> {
+    return this.request('/recognition/continuous-session/add-token', {
+      method: 'POST',
+      body: JSON.stringify({ sign, confidence }),
+    });
+  }
+
+  async generateSentence(tokens: string[], confidences?: number[]): Promise<GeneratedSentence> {
+    return this.request('/recognition/generate-sentence', {
+      method: 'POST',
+      body: JSON.stringify({ tokens, confidences }),
+    });
   }
 }
 

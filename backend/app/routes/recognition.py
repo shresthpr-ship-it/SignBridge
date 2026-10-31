@@ -6,10 +6,19 @@ import cv2
 import numpy as np
 from fastapi import APIRouter, UploadFile, File, Form, Query, HTTPException
 
-from app.models import RecognitionRequest, RecognitionResponse, LandmarkPoint, TeachGestureRequest
+from app.models import (
+    RecognitionRequest,
+    RecognitionResponse,
+    LandmarkPoint,
+    TeachGestureRequest,
+    SentenceGenerateRequest,
+    AddManualTokenRequest,
+)
 from app.services.recognizer_service import recognizer_service
 from app.services.recognition_service import recognition_service
 from app.services.vision_pipeline import vision_pipeline
+from app.services.continuous_recognition_service import continuous_recognizer
+from app.services.sentence_service import sentence_generation_service
 
 router = APIRouter(prefix="/recognition", tags=["Recognition"])
 
@@ -105,6 +114,9 @@ async def recognize_live_frame(
 
     rec_result = recognition_service.infer_sign(primary_pts)
 
+    # 3. Continuous Recognition Session & Sentence Evolution
+    continuous_snapshot = continuous_recognizer.process_frame(primary_pts, hand_present=hand_present)
+
     latency_ms = round((time.perf_counter() - start_t) * 1000, 2)
 
     # Record valid detections to history
@@ -143,9 +155,67 @@ async def recognize_live_frame(
         "recognition_message": rec_result["recognition_message"],
         "alternatives": [a.model_dump() for a in rec_result["alternatives"]],
 
+        # Continuous Sign Recognition & Sentence Generation State
+        "continuous_state": continuous_snapshot,
+
         "latency_ms": latency_ms,
         "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()
     }
+
+
+@router.get("/continuous-session")
+def get_continuous_session():
+    """
+    Returns the real-time continuous sign recognition session state,
+    including the active sequence of committed sign tokens, motion energy,
+    and generated grammatical sentences in English and Hindi.
+    """
+    return continuous_recognizer.get_snapshot().model_dump()
+
+
+@router.post("/continuous-session/reset")
+def reset_continuous_session():
+    """
+    Resets the active continuous recognition sequence, motion buffers, and sentence.
+    """
+    continuous_recognizer.reset_session()
+    return {"status": "session_reset", "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()}
+
+
+@router.post("/continuous-session/remove-token")
+def remove_continuous_token():
+    """
+    Removes the most recently committed sign token from the active sentence.
+    """
+    removed = continuous_recognizer.remove_last_token()
+    return {
+        "status": "token_removed" if removed else "no_tokens",
+        "removed_token": removed.model_dump() if removed else None,
+        "snapshot": continuous_recognizer.get_snapshot().model_dump()
+    }
+
+
+@router.post("/continuous-session/add-token")
+def add_continuous_token(req: AddManualTokenRequest):
+    """
+    Manually appends a sign token to the continuous sequence.
+    """
+    token = continuous_recognizer.add_token(req.sign, confidence=req.confidence or 95.0)
+    return {
+        "status": "token_added",
+        "token": token.model_dump(),
+        "snapshot": continuous_recognizer.get_snapshot().model_dump()
+    }
+
+
+@router.post("/generate-sentence")
+def generate_sentence_from_tokens(req: SentenceGenerateRequest):
+    """
+    Takes an arbitrary list of sign tokens (e.g. ['Hello', 'What', 'Drink'])
+    and returns a grammatically structured sentence in English and Hindi.
+    """
+    res = sentence_generation_service.generate_sentence(req.tokens, req.confidences)
+    return res.model_dump()
 
 
 @router.get("/history")

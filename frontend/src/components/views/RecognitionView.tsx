@@ -16,6 +16,10 @@ import {
   SwitchCamera,
   Volume2,
   VolumeX,
+  MessageSquare,
+  Copy,
+  Undo2,
+  ArrowRight,
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -27,6 +31,7 @@ import {
   LiveFrameRecognitionResponse,
   ModelStatus,
   RecognitionHistoryRecord,
+  ContinuousSessionState,
 } from '../../types';
 import { drawFullFrameLandmarks } from '../../utils/handRenderer';
 import { useCameraPermissions } from '../../hooks/useCameraPermissions';
@@ -70,6 +75,11 @@ export const RecognitionView: React.FC = () => {
   const [autoSpeak, setAutoSpeak] = useState<boolean>(true);
   const [speechMode, setSpeechMode] = useState<SpeechAudioMode>('hindi');
 
+  // Continuous Sign Recognition & Sentence Generation States
+  const [continuousMode, setContinuousMode] = useState<boolean>(true);
+  const [continuousSession, setContinuousSession] = useState<ContinuousSessionState | null>(null);
+  const [copiedSentence, setCopiedSentence] = useState<boolean>(false);
+
   // Model & Recognition results
   const [modelStatus, setModelStatus] = useState<ModelStatus | null>(null);
   const [liveResult, setLiveResult] = useState<LiveFrameRecognitionResponse | null>(null);
@@ -87,10 +97,11 @@ export const RecognitionView: React.FC = () => {
   const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const isEvaluatingRef = useRef<boolean>(false);
 
-  // Load Model Status & History on mount
+  // Load Model Status, History & Continuous Session on mount
   useEffect(() => {
     api.getRecognitionModelStatus().then(setModelStatus).catch(() => {});
     api.getPredictionHistory().then(setHistory).catch(() => {});
+    api.getContinuousSession().then(setContinuousSession).catch(() => {});
   }, []);
 
   // Enumerate video devices
@@ -216,6 +227,10 @@ export const RecognitionView: React.FC = () => {
       // Send to backend high-speed pipeline (pose and face only when enabled)
       const res = await api.recognizeLiveFrame(blob, 3, showPoseLayer, showFaceLayer);
       setLiveResult(res);
+
+      if (res.continuous_state) {
+        setContinuousSession(res.continuous_state);
+      }
 
       if (res.model_status) {
         setModelStatus(res.model_status);
@@ -386,11 +401,61 @@ export const RecognitionView: React.FC = () => {
   const handleResetSession = async () => {
     try {
       await api.resetRecognitionSession();
+      await api.resetContinuousSession();
       setHistory([]);
       setLiveResult(null);
+      const snap = await api.getContinuousSession();
+      setContinuousSession(snap);
+      addToast({
+        type: 'info',
+        title: 'Session Reset',
+        message: 'Continuous sequence buffer and temporal smoothing window cleared.',
+      });
     } catch (err) {
       console.warn('Failed to reset session:', err);
+      setLiveResult(null);
     }
+  };
+
+  const handleRemoveLastToken = async () => {
+    try {
+      const res = await api.removeContinuousToken();
+      setContinuousSession(res.snapshot);
+      addToast({
+        type: 'info',
+        message: res.removed_token ? `Undid sign token "${res.removed_token.sign}".` : 'No tokens to undo.',
+      });
+    } catch (err: any) {
+      addToast({ type: 'error', message: err.message || 'Failed to remove token' });
+    }
+  };
+
+  const handleAddManualToken = async (signName: string) => {
+    try {
+      const res = await api.addContinuousToken(signName);
+      setContinuousSession(res.snapshot);
+      addToast({
+        type: 'success',
+        message: `Appended "${signName}" to continuous sentence.`,
+      });
+    } catch (err: any) {
+      addToast({ type: 'error', message: err.message || 'Failed to append token' });
+    }
+  };
+
+  const handleSpeakSentence = () => {
+    if (!continuousSession?.generated_sentence) return;
+    const s = continuousSession.generated_sentence;
+    SpeechService.speakSentence(s.english_sentence, s.hindi_sentence, s.hindi_phonetic, speechMode);
+  };
+
+  const handleCopySentence = () => {
+    if (!continuousSession?.generated_sentence) return;
+    const textToCopy = `${continuousSession.generated_sentence.english_sentence}\n${continuousSession.generated_sentence.hindi_sentence}`;
+    navigator.clipboard.writeText(textToCopy);
+    setCopiedSentence(true);
+    setTimeout(() => setCopiedSentence(false), 2000);
+    addToast({ type: 'success', message: 'Sentence copied to clipboard!' });
   };
 
   return (
@@ -707,6 +772,223 @@ export const RecognitionView: React.FC = () => {
         {/* RIGHT COLUMN: Sign Recognition & Model Evaluation (5 cols)    */}
         {/* ============================================================ */}
         <div className="lg:col-span-5 space-y-4">
+          {/* Continuous Sign Recognition & Sentence Generation Workspace */}
+          <Card
+            compact
+            title="Continuous Sentence Generation"
+            actions={
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {/* Mode toggle */}
+                <button
+                  type="button"
+                  onClick={() => setContinuousMode(!continuousMode)}
+                  className={`px-2 py-0.5 rounded text-[10px] font-semibold border flex items-center gap-1 transition-colors ${
+                    continuousMode
+                      ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                      : 'bg-slate-100 border-slate-300 text-slate-600'
+                  }`}
+                  title="Toggle continuous sentence recognition"
+                >
+                  <Sparkles className="w-3 h-3 text-emerald-600" />
+                  <span>{continuousMode ? 'Continuous Mode: ON' : 'Isolated Mode'}</span>
+                </button>
+
+                {/* Reset Sentence Button */}
+                <button
+                  type="button"
+                  onClick={handleResetSession}
+                  className="text-[11px] text-slate-500 hover:text-slate-800 flex items-center gap-1"
+                  title="Reset sequence buffer and clear sentence"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Clear
+                </button>
+              </div>
+            }
+          >
+            <div className="space-y-3">
+              {/* Motion Dynamics & State Header */}
+              <div className="flex items-center justify-between text-xs bg-slate-50 p-2 rounded border border-slate-200">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                      continuousSession?.motion_state === 'signing'
+                        ? 'bg-emerald-100 border-emerald-300 text-emerald-800 animate-pulse'
+                        : continuousSession?.motion_state === 'transition'
+                        ? 'bg-blue-100 border-blue-300 text-blue-800'
+                        : 'bg-slate-200 border-slate-300 text-slate-600'
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        continuousSession?.motion_state === 'signing'
+                          ? 'bg-emerald-600'
+                          : continuousSession?.motion_state === 'transition'
+                          ? 'bg-blue-600'
+                          : 'bg-slate-400'
+                      }`}
+                    />
+                    <span>
+                      {continuousSession?.motion_state === 'signing'
+                        ? 'Signing Active'
+                        : continuousSession?.motion_state === 'transition'
+                        ? 'In Motion / Transition'
+                        : 'Resting / Neutral'}
+                    </span>
+                  </span>
+
+                  <span className="text-[10px] font-mono text-slate-500">
+                    Energy: {continuousSession?.motion_energy || 0} m/s
+                  </span>
+                </div>
+
+                <div className="text-[10px] text-slate-500 font-mono">
+                  {continuousSession?.total_tokens_recognized || 0} signs in sequence
+                </div>
+              </div>
+
+              {/* Natural Synthesized Sentence Presentation Box */}
+              <div className="p-4 rounded-lg bg-slate-900 border border-slate-800 text-left space-y-2 relative overflow-hidden">
+                <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                  <span className="flex items-center gap-1 text-emerald-400 font-semibold">
+                    <MessageSquare className="w-3 h-3" />
+                    Live Generated Sentence
+                  </span>
+                  {continuousSession?.generated_sentence?.grammar_pattern && (
+                    <span className="text-slate-400">
+                      Grammar: {continuousSession.generated_sentence.grammar_pattern}
+                    </span>
+                  )}
+                </div>
+
+                {/* English Sentence */}
+                <div className="text-base font-bold text-white tracking-tight leading-snug">
+                  {continuousSession?.generated_sentence?.english_sentence ? (
+                    <span>“{continuousSession.generated_sentence.english_sentence}”</span>
+                  ) : (
+                    <span className="text-slate-500 font-normal italic text-sm">
+                      Hold gestures sequentially to form a live continuous sentence...
+                    </span>
+                  )}
+                </div>
+
+                {/* Hindi Translation */}
+                {continuousSession?.generated_sentence?.hindi_sentence && (
+                  <div className="text-sm font-semibold text-amber-300/95">
+                    “{continuousSession.generated_sentence.hindi_sentence}”
+                  </div>
+                )}
+
+                {/* Phonetic Pronunciation */}
+                {continuousSession?.generated_sentence?.hindi_phonetic && (
+                  <div className="text-[11px] text-amber-200/70 font-mono">
+                    ISL Spoken: "{continuousSession.generated_sentence.hindi_phonetic}"
+                  </div>
+                )}
+
+                {/* Sentence Controls */}
+                <div className="flex items-center gap-2 pt-2 border-t border-slate-800 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={handleSpeakSentence}
+                    disabled={!continuousSession?.generated_sentence}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold shadow transition-all cursor-pointer"
+                    title="Speak the full translated sentence"
+                  >
+                    <Volume2 className="w-3.5 h-3.5" />
+                    <span>Speak Full Sentence</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleCopySentence}
+                    disabled={!continuousSession?.generated_sentence}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 text-xs font-medium border border-slate-700 transition-all cursor-pointer"
+                    title="Copy sentence to clipboard"
+                  >
+                    <Copy className="w-3 h-3" />
+                    <span>{copiedSentence ? 'Copied!' : 'Copy'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleRemoveLastToken}
+                    disabled={!continuousSession?.active_sequence || continuousSession.active_sequence.length === 0}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-300 text-xs font-medium border border-slate-700 transition-all cursor-pointer"
+                    title="Remove the last recognized sign"
+                  >
+                    <Undo2 className="w-3 h-3" />
+                    <span>Undo Sign</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Raw Sign Gloss Stream (Token Sequence) */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-semibold text-slate-700">
+                    Recognized Sign Tokens (Raw Gloss Stream)
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    Temporal Segmentation & Consensus
+                  </span>
+                </div>
+
+                {continuousSession?.active_sequence && continuousSession.active_sequence.length > 0 ? (
+                  <div className="flex items-center gap-1.5 flex-wrap p-2 rounded bg-slate-50 border border-slate-200 min-h-[40px]">
+                    {continuousSession.active_sequence.map((tok, idx) => (
+                      <div
+                        key={tok.id || idx}
+                        className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-white border border-indigo-200 shadow-xs text-xs"
+                      >
+                        <span className="font-bold text-indigo-900 tracking-wide font-mono">
+                          {tok.sign.toUpperCase()}
+                        </span>
+                        <span className="text-[9px] px-1 rounded bg-indigo-50 text-indigo-700 font-mono font-medium">
+                          {tok.confidence.toFixed(0)}%
+                        </span>
+                        {idx < continuousSession.active_sequence.length - 1 && (
+                          <ArrowRight className="w-3 h-3 text-slate-400 shrink-0 ml-0.5" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-2.5 rounded bg-slate-50 border border-dashed border-slate-200 text-center text-xs text-slate-400">
+                    No signs accumulated yet. Show gestures sequentially to assemble sentence.
+                  </div>
+                )}
+                <p className="text-[10px] text-slate-400 leading-tight">
+                  <em>Note:</em> Raw tokens represent detected signs. The sentence generator applies ISL discourse grammar to formulate natural phrases.
+                </p>
+              </div>
+
+              {/* Interactive Quick-Token Palette for Validation & Demo */}
+              <div className="pt-2 border-t border-slate-100 space-y-1.5">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-semibold text-slate-700 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-amber-500" />
+                    Test Sentence Combinations (Interactive Quick Tokens)
+                  </span>
+                  <span className="text-[10px] text-slate-400">Click to append</span>
+                </div>
+
+                <div className="flex items-center gap-1 flex-wrap">
+                  {['Hello', 'Eat', 'Drink', 'What', 'Where', 'Why', 'Help', 'Okay', 'Thank You', 'Yes', 'No', 'Peace'].map((signName) => (
+                    <button
+                      key={signName}
+                      type="button"
+                      onClick={() => handleAddManualToken(signName)}
+                      className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300 border border-slate-200 text-slate-700 transition-all cursor-pointer"
+                    >
+                      + {signName}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Card>
+
           {/* Current Recognized Sign Display */}
           <Card
             compact

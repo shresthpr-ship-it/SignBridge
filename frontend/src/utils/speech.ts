@@ -131,6 +131,73 @@ export class SpeechService {
   }
 
   /**
+   * Speak an entire generated sentence in the selected audio mode.
+   */
+  public static speakSentence(
+    englishText: string,
+    hindiText: string,
+    hindiPhonetic: string,
+    mode: SpeechAudioMode = 'hindi'
+  ): boolean {
+    if (!this.synth) return false;
+
+    try {
+      this.synth.cancel();
+      const voices = this.getAvailableVoices();
+
+      const hindiVoice = voices.find(
+        (v) =>
+          v.lang.toLowerCase().startsWith('hi') ||
+          v.name.toLowerCase().includes('hindi')
+      );
+      const indianEngVoice = voices.find(
+        (v) =>
+          (v.lang.toLowerCase() === 'en-in' || v.lang.toLowerCase().includes('india')) &&
+          !v.lang.toLowerCase().startsWith('hi')
+      );
+      const defaultVoice = voices.find((v) => v.lang.toLowerCase().startsWith('en')) || voices[0] || null;
+
+      let utteranceText = '';
+      let targetLang = 'en-US';
+      let targetVoice: SpeechSynthesisVoice | null = null;
+
+      if (mode === 'hindi') {
+        if (hindiVoice) {
+          utteranceText = hindiText;
+          targetLang = hindiVoice.lang || 'hi-IN';
+          targetVoice = hindiVoice;
+        } else {
+          utteranceText = hindiPhonetic || englishText;
+          targetVoice = indianEngVoice || defaultVoice;
+          targetLang = targetVoice?.lang || 'en-IN';
+        }
+      } else if (mode === 'bilingual') {
+        utteranceText = `${englishText}... ${hindiPhonetic || hindiText}`;
+        targetVoice = indianEngVoice || defaultVoice;
+        targetLang = targetVoice?.lang || 'en-IN';
+      } else {
+        utteranceText = englishText;
+        targetVoice = defaultVoice;
+        targetLang = targetVoice?.lang || 'en-US';
+      }
+
+      const utt = new SpeechSynthesisUtterance(utteranceText);
+      utt.lang = targetLang;
+      utt.rate = 0.95;
+      utt.volume = 1.0;
+      if (targetVoice) {
+        utt.voice = targetVoice;
+      }
+
+      this.synth.speak(utt);
+      return true;
+    } catch (err) {
+      console.warn('[SpeechService] Sentence synthesis error:', err);
+      return false;
+    }
+  }
+
+  /**
    * Directly speak any text string
    */
   public static speak(text: string, _force?: boolean): boolean {

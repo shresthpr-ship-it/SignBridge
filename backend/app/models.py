@@ -158,3 +158,48 @@ class ExtractionResult(BaseModel):
     creation_timestamp: str
     engine: str
     frames: List[FrameLandmarks]
+
+
+# Continuous Recognition & Sentence Generation Models
+
+class SignTokenModel(BaseModel):
+    id: str
+    sign: str
+    confidence: float
+    timestamp: float
+    duration_ms: float
+    motion_energy: float = 0.0
+
+class GeneratedSentenceModel(BaseModel):
+    raw_sequence: List[str]
+    gloss_display: str
+    english_sentence: str
+    hindi_sentence: str
+    hindi_phonetic: str
+    is_complete: bool = False
+    confidence_avg: float = 90.0
+    grammar_pattern: str = "Standard"
+
+class ContinuousSessionResponse(BaseModel):
+    session_id: str
+    is_active: bool
+    motion_state: str  # 'signing' | 'transition' | 'idle'
+    motion_energy: float
+    current_frame_sign: Optional[str] = None
+    current_frame_confidence: Optional[float] = None
+    stable_candidate: Optional[str] = None
+    stable_candidate_frames: int = 0
+    active_sequence: List[SignTokenModel] = []
+    raw_gloss_sequence: List[str] = []
+    generated_sentence: Optional[GeneratedSentenceModel] = None
+    total_tokens_recognized: int = 0
+    session_duration_s: float = 0.0
+    last_commit_time_ago_s: float = 0.0
+
+class SentenceGenerateRequest(BaseModel):
+    tokens: List[str]
+    confidences: Optional[List[float]] = None
+
+class AddManualTokenRequest(BaseModel):
+    sign: str
+    confidence: Optional[float] = 95.0

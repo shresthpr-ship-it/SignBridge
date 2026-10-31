@@ -259,6 +259,7 @@ export interface LiveFrameRecognitionResponse {
   alternatives: PredictionAlternative[];
   latency_ms: number;
   timestamp: string;
+  continuous_state?: ContinuousSessionState;
 }
 
 export interface RecognitionHistoryRecord {
@@ -271,3 +272,41 @@ export interface RecognitionHistoryRecord {
   handedness?: string | null;
 }
 
+
+
+export interface SignToken {
+  id: string;
+  sign: string;
+  confidence: number;
+  timestamp: number;
+  duration_ms: number;
+  motion_energy: number;
+}
+
+export interface GeneratedSentence {
+  raw_sequence: string[];
+  gloss_display: string;
+  english_sentence: string;
+  hindi_sentence: string;
+  hindi_phonetic: string;
+  is_complete: boolean;
+  confidence_avg: number;
+  grammar_pattern: string;
+}
+
+export interface ContinuousSessionState {
+  session_id: string;
+  is_active: boolean;
+  motion_state: 'signing' | 'transition' | 'idle' | string;
+  motion_energy: number;
+  current_frame_sign: string | null;
+  current_frame_confidence: number | null;
+  stable_candidate: string | null;
+  stable_candidate_frames: number;
+  active_sequence: SignToken[];
+  raw_gloss_sequence: string[];
+  generated_sentence: GeneratedSentence | null;
+  total_tokens_recognized: number;
+  session_duration_s: number;
+  last_commit_time_ago_s: number;
+}
