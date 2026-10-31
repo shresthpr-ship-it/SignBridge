@@ -149,6 +149,7 @@ export interface ToastMessage {
 export type ActiveTab =
   | 'overview'
   | 'recognition'
+  | 'sentence-mode'
   | 'studio'
   | 'video'
   | 'dataset'
@@ -310,3 +311,44 @@ export interface ContinuousSessionState {
   session_duration_s: number;
   last_commit_time_ago_s: number;
 }
+
+
+export interface DetectedSignSegment {
+  sign: string;
+  confidence: number;
+  start_time_ms: number;
+  end_time_ms: number;
+  frame_count: number;
+}
+
+export interface SentenceModeProcessingResult {
+  session_id: string;
+  target_language: string;
+  recognition_task: 'sentence_translation' | 'gloss_sequence' | 'recognition_unavailable' | string;
+  status: 'success' | 'no_hands_detected' | 'no_recognized_signs' | 'error' | string;
+  message: string;
+  video_filename: string;
+  video_url?: string | null;
+  duration_seconds: number;
+  total_frames: number;
+  processed_frames: number;
+  frames_with_hands: number;
+  raw_gloss_sequence: string[];
+  detected_segments: DetectedSignSegment[];
+  generated_sentence?: GeneratedSentence | null;
+  model_info: ModelStatus | Record<string, any>;
+  processing_time_ms: number;
+  created_at: string;
+}
+
+export type SentenceModeState =
+  | 'idle'
+  | 'camera_initializing'
+  | 'camera_ready'
+  | 'recording'
+  | 'recording_finalizing'
+  | 'recorded'
+  | 'uploading'
+  | 'processing'
+  | 'result_ready'
+  | 'error';

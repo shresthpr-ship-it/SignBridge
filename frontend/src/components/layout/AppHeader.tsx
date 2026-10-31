@@ -28,6 +28,10 @@ const PAGE_METADATA: Record<ActiveTab, PageMeta> = {
     title: 'Live Recognition',
     description: 'Real-time gesture inference and candidate scoring on 21-point hand topology.',
   },
+  'sentence-mode': {
+    title: 'Sentence Mode',
+    description: 'Record complete sign-language messages, translate to sentence text, edit, and listen.',
+  },
   studio: {
     title: 'Capture Studio',
     description: 'Collect, label, and partition calibrated hand landmark sequences.',

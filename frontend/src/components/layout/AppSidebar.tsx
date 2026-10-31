@@ -2,6 +2,7 @@ import React from 'react';
 import {
   LayoutDashboard,
   Crosshair,
+  Film,
   Video,
   FileVideo,
   Database,
@@ -37,6 +38,13 @@ export const AppSidebar: React.FC = () => {
       id: 'recognition',
       label: 'Live Recognition',
       icon: <Crosshair className="w-4 h-4" />,
+    },
+    {
+      id: 'sentence-mode',
+      label: 'Sentence Mode',
+      icon: <Film className="w-4 h-4" />,
+      badge: 'NEW',
+      badgeVariant: 'indigo',
     },
     {
       id: 'studio',

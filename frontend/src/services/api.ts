@@ -20,6 +20,7 @@ import {
   SignToken,
   GeneratedSentence,
   ContinuousSessionState,
+  SentenceModeProcessingResult,
 } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -349,6 +350,46 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify({ tokens, confidences }),
     });
+  }
+
+  // Sentence Mode API
+  async getSentenceModeStatus(): Promise<{
+    status: string;
+    supported_video_formats: string[];
+    max_file_size_mb: number;
+    default_language: string;
+    supported_languages: string[];
+    model_status: ModelStatus;
+    recommended_recording_duration_s: string;
+  }> {
+    return this.request('/sentence-mode/status');
+  }
+
+  async getSentenceModeHistory(): Promise<SentenceModeProcessingResult[]> {
+    return this.request('/sentence-mode/history');
+  }
+
+  async translateRecordedSentence(
+    videoBlob: Blob,
+    targetLanguage: string = 'ISL'
+  ): Promise<SentenceModeProcessingResult> {
+    const formData = new FormData();
+    const extension = videoBlob.type.includes('mp4') ? 'mp4' : 'webm';
+    formData.append('file', videoBlob, `sentence_recording_${Date.now()}.${extension}`);
+    formData.append('target_language', targetLanguage);
+
+    const url = `${BASE_URL}/sentence-mode/translate`;
+    const response = await fetch(url, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => ({ detail: response.statusText }));
+      throw new Error(errorBody.detail || `Sentence translation failed with status ${response.status}`);
+    }
+
+    return await response.json();
   }
 }
 
