@@ -1,5 +1,19 @@
 [
   {
+    "id": "med-d2f1d761",
+    "media_type": "image",
+    "sign_language": "ASL",
+    "sign_label": "Namaste",
+    "description": "",
+    "signer_id": "signer_gicg",
+    "consent_confirmed": true,
+    "filename": "med-d2f1d761.png",
+    "file_url": "/media/images/med-d2f1d761.png",
+    "file_size_bytes": 1004434,
+    "split": "train",
+    "created_at": "2026-10-31T15:07:32.139208"
+  },
+  {
     "id": "med-1ef8517e",
     "media_type": "video",
     "sign_language": "ASL",

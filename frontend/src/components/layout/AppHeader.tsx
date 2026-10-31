@@ -11,8 +11,8 @@ interface PageMeta {
 }
 
 const PRESET_LANGUAGES = [
+  { code: 'ISL', name: 'ISL (Indian Sign Language - हिन्दी)' },
   { code: 'ASL', name: 'ASL (American)' },
-  { code: 'ISL', name: 'ISL (Indian)' },
   { code: 'BSL', name: 'BSL (British)' },
   { code: 'AUSLAN', name: 'AUSLAN (Australian)' },
   { code: 'LSF', name: 'LSF (French)' },

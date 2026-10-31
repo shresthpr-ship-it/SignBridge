@@ -32,6 +32,7 @@ import { drawFullFrameLandmarks } from '../../utils/handRenderer';
 import { useCameraPermissions } from '../../hooks/useCameraPermissions';
 import { CameraPermissionGuardian } from '../camera/CameraPermissionGuardian';
 import { SpeechService } from '../../utils/speech';
+import { getISLTranslation, ISL_TRANSLATIONS } from '../../utils/islDictionary';
 
 export const RecognitionView: React.FC = () => {
   const { selectedLanguage, addToast, refreshData } = useApp();
@@ -48,8 +49,8 @@ export const RecognitionView: React.FC = () => {
   const cameraPermission = useCameraPermissions();
 
   // Interactive Teaching / Retraining States
-  const [teachLabel, setTeachLabel] = useState<string>('Okay');
-  const [teachLanguage, setTeachLanguage] = useState<string>(selectedLanguage || 'ASL');
+  const [teachLabel, setTeachLabel] = useState<string>('Eat');
+  const [teachLanguage, setTeachLanguage] = useState<string>(selectedLanguage || 'ISL');
   const [isTeaching, setIsTeaching] = useState<boolean>(false);
   const [teachSuccessMsg, setTeachSuccessMsg] = useState<string | null>(null);
 
@@ -222,19 +223,27 @@ export const RecognitionView: React.FC = () => {
       // Add to history and pronounce with Speech Synthesis if recognition is active and valid
       if (res.predicted_sign && res.prediction_state !== 'unknown') {
         const signText = res.predicted_sign;
+        const isl = getISLTranslation(signText);
+
+        // Determine spoken language & text (default to Hindi for ISL)
+        const isISLMode = !selectedLanguage || selectedLanguage === 'ISL';
+        const spokenText = isISLMode && isl ? isl.spokenHindi : signText;
+        const spokenLang = isISLMode ? 'hi-IN' : 'en-US';
 
         // Auto-Speak if enabled and confirmed
         if (autoSpeak && (res.prediction_state === 'stable' || (res.confidence_score || 0) >= 88)) {
-          SpeechService.speak(signText);
+          SpeechService.speak(spokenText, false, spokenLang);
         }
 
+        const displayLabel = isl ? `${isl.hindi} (${isl.english})` : signText;
+
         setHistory((prev) => {
-          if (prev.length > 0 && prev[0].sign === signText) {
+          if (prev.length > 0 && prev[0].sign === displayLabel) {
             return prev;
           }
           return [
             {
-              sign: signText,
+              sign: displayLabel,
               confidence: res.confidence_score,
               state: res.prediction_state as 'stable' | 'provisional',
               stability_score: res.stability_score,
@@ -741,63 +750,83 @@ export const RecognitionView: React.FC = () => {
             <div className="p-4 bg-slate-900 rounded-md border border-slate-800 text-center space-y-3">
               {/* Primary Sign / State Wordmark */}
               {liveResult && liveResult.predicted_sign && liveResult.prediction_state !== 'unknown' ? (
-                <div>
-                  <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-1">
-                    Recognized Sign / Phrase
-                  </span>
+                (() => {
+                  const isl = getISLTranslation(liveResult.predicted_sign);
+                  const isISLMode = !selectedLanguage || selectedLanguage === 'ISL';
+                  const primaryText = isISLMode && isl ? isl.hindi : liveResult.predicted_sign;
+                  const subtitle = isl ? `${isl.transliteration} • ${isl.english}` : null;
+                  const spokenText = isISLMode && isl ? isl.spokenHindi : liveResult.predicted_sign;
+                  const spokenLang = isISLMode ? 'hi-IN' : 'en-US';
 
-                  <div className="flex items-center justify-center gap-3">
-                    <div className="text-3xl font-extrabold text-white tracking-tight">
-                      {liveResult.predicted_sign}
+                  return (
+                    <div>
+                      <div className="flex items-center justify-center gap-1.5 mb-1.5">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-400">
+                          {isISLMode ? 'भारतीय सांकेतिक भाषा (ISL)' : 'Recognized Sign / Phrase'}
+                        </span>
+                        {isl && <span className="text-base">{isl.icon}</span>}
+                      </div>
+
+                      <div className="flex items-center justify-center gap-3">
+                        <div className="text-4xl font-extrabold text-white tracking-tight">
+                          {primaryText}
+                        </div>
+
+                        {/* Pronounce in Hindi / English */}
+                        <button
+                          type="button"
+                          onClick={() => SpeechService.speak(spokenText, true, spokenLang)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 active:scale-95 text-white text-xs font-semibold shadow-md shadow-orange-950/60 transition-all cursor-pointer"
+                          title="हिंदी में सुनें (Pronounce in Hindi)"
+                        >
+                          <Volume2 className="w-3.5 h-3.5" />
+                          <span>सुनें (Speak)</span>
+                        </button>
+                      </div>
+
+                      {subtitle && (
+                        <div className="text-xs font-medium text-slate-300 mt-1">
+                          {subtitle}
+                        </div>
+                      )}
+
+                      {/* Stability & Confidence Badge */}
+                      <div className="flex items-center justify-center gap-2 mt-2">
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider border ${
+                            liveResult.prediction_state === 'stable'
+                              ? 'bg-emerald-950 border-emerald-700 text-emerald-400'
+                              : 'bg-amber-950 border-amber-700 text-amber-400'
+                          }`}
+                        >
+                          {liveResult.prediction_state === 'stable' ? '✓ निश्चित (Stable)' : 'स्थिर हो रहा है (Stabilizing...)'}
+                        </span>
+
+                        {liveResult.confidence_score !== null && (
+                          <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-mono text-slate-300">
+                            {liveResult.confidence_score.toFixed(1)}% सटीकता (Confidence)
+                          </span>
+                        )}
+                      </div>
                     </div>
-
-                    {/* Pronounce / Speak Button */}
-                    <button
-                      type="button"
-                      onClick={() => SpeechService.speak(liveResult.predicted_sign!, true)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-xs font-semibold shadow-md shadow-indigo-900/60 transition-all"
-                      title="Pronounce translated sign out loud"
-                    >
-                      <Volume2 className="w-3.5 h-3.5" />
-                      <span>Speak</span>
-                    </button>
-                  </div>
-
-                  {/* Stability & Confidence Badge */}
-                  <div className="flex items-center justify-center gap-2 mt-2">
-                    <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider border ${
-                        liveResult.prediction_state === 'stable'
-                          ? 'bg-emerald-950 border-emerald-700 text-emerald-400'
-                          : 'bg-amber-950 border-amber-700 text-amber-400'
-                      }`}
-                    >
-                      {liveResult.prediction_state === 'stable' ? 'Stable Detection' : 'Provisional (Stabilizing)'}
-                    </span>
-
-                    {liveResult.confidence_score !== null && (
-                      <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-mono text-slate-300">
-                        {liveResult.confidence_score.toFixed(1)}% model match
-                      </span>
-                    )}
-                  </div>
-                </div>
+                  );
+                })()
               ) : (
                 <div className="py-2">
                   <HelpCircle className="w-8 h-8 text-slate-600 mx-auto mb-2" />
                   <p className="text-sm font-semibold text-slate-300">
                     {!isCameraActive
-                      ? 'Camera Feed Offline'
+                      ? 'कैमरा बंद है (Camera Feed Offline)'
                       : !liveResult?.hand_detected
-                      ? 'No Hand Detected in Camera Frame'
-                      : 'Unknown / Ambiguous Sign Posture'}
+                      ? 'कैमरे में हाथ नहीं दिख रहा (No Hand Detected)'
+                      : 'संकेत पहचाना नहीं गया (Unknown Sign Posture)'}
                   </p>
                   <p className="text-xs text-slate-500 max-w-xs mx-auto mt-1">
                     {!isCameraActive
-                      ? 'Start the camera on the left panel to begin streaming.'
+                      ? 'संकेत अनुवाद शुरू करने के लिए बाएँ पैनल पर कैमरा शुरू करें।'
                       : !liveResult?.hand_detected
-                      ? 'Position your hand clearly within the camera boundary.'
-                      : liveResult?.recognition_message || 'Movement/posture is below confident recognition threshold.'}
+                      ? 'कृपया अपना हाथ कैमरे के सामने स्पष्ट रूप से दिखाएँ।'
+                      : liveResult?.recognition_message || 'हाथ की मुद्रा किसी मान्यता प्राप्त संकेत से मेल नहीं खा रही है।'}
                   </p>
                 </div>
               )}
@@ -806,28 +835,32 @@ export const RecognitionView: React.FC = () => {
             {/* Candidates & Explanatory Reasoning */}
             <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
               <span className="text-[11px] font-semibold text-slate-700 block">
-                Model Evaluation & Candidates
+                संकेत विकल्प एवं सटीकता (Top Candidates)
               </span>
 
               {liveResult && liveResult.alternatives && liveResult.alternatives.length > 0 ? (
                 <div className="space-y-1">
-                  {liveResult.alternatives.map((alt, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between text-xs p-1.5 rounded bg-slate-50 border border-slate-200"
-                    >
-                      <span className="font-mono text-slate-800 font-medium">
-                        #{idx + 1} {alt.label}
-                      </span>
-                      <span className="font-mono text-[11px] text-slate-500">
-                        {alt.confidence.toFixed(1)}% match
-                      </span>
-                    </div>
-                  ))}
+                  {liveResult.alternatives.map((alt, idx) => {
+                    const altIsl = getISLTranslation(alt.label);
+                    return (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between text-xs p-1.5 rounded bg-slate-50 border border-slate-200"
+                      >
+                        <span className="font-medium text-slate-800 flex items-center gap-1.5">
+                          <span className="text-slate-400">#{idx + 1}</span>
+                          <span>{altIsl ? `${altIsl.hindi} (${altIsl.english})` : alt.label}</span>
+                        </span>
+                        <span className="font-mono text-slate-600 text-[11px]">
+                          {alt.confidence.toFixed(1)}%
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-[11px] text-slate-400 italic">
-                  No alternative candidate scores available for this frame.
+                  कोई अन्य विकल्प उपलब्ध नहीं है (No alternatives available).
                 </p>
               )}
             </div>
@@ -860,39 +893,39 @@ export const RecognitionView: React.FC = () => {
               {/* Quick Preset Gesture Chips */}
               <div>
                 <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
-                  Quick Select Sign:
+                  त्वरित संकेत चुनें (Quick Select Sign):
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {[
-                    'Drink',
-                    'Eat',
-                    'Say',
-                    'What',
-                    'Where',
-                    'Why',
-                    'Who',
-                    'Which',
-                    'Okay',
-                    'Hello',
-                    'Thank You',
-                    'Peace',
-                    'Yes',
-                    'No',
-                    'I Love You',
-                    'Help',
-                    'Fist',
+                    { label: 'Eat', display: 'खाना (Eat)' },
+                    { label: 'Drink', display: 'पीना (Drink)' },
+                    { label: 'What', display: 'क्या (What)' },
+                    { label: 'Where', display: 'कहाँ (Where)' },
+                    { label: 'Why', display: 'क्यों (Why)' },
+                    { label: 'Who', display: 'कौन (Who)' },
+                    { label: 'Which', display: 'कौनसा (Which)' },
+                    { label: 'Say', display: 'बोलना (Say)' },
+                    { label: 'Okay', display: 'ठीक है (Okay)' },
+                    { label: 'Hello', display: 'नमस्ते (Hello)' },
+                    { label: 'Thank You', display: 'धन्यवाद (Thanks)' },
+                    { label: 'Yes', display: 'हाँ (Yes)' },
+                    { label: 'No', display: 'नहीं (No)' },
+                    { label: 'Peace', display: 'शांति (Peace)' },
+                    { label: 'Help', display: 'मदद (Help)' },
+                    { label: 'I Love You', display: 'प्यार (Love)' },
+                    { label: 'Fist', display: 'मुट्ठी (Fist)' },
                   ].map((preset) => (
                     <button
-                      key={preset}
+                      key={preset.label}
                       type="button"
-                      onClick={() => setTeachLabel(preset)}
+                      onClick={() => setTeachLabel(preset.label)}
                       className={`px-2 py-0.5 rounded text-[11px] font-medium border transition-colors ${
-                        teachLabel.toLowerCase() === preset.toLowerCase()
-                          ? 'bg-indigo-600 text-white border-indigo-600'
+                        teachLabel.toLowerCase() === preset.label.toLowerCase()
+                          ? 'bg-amber-600 text-white border-amber-600'
                           : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                       }`}
                     >
-                      {preset}
+                      {preset.display}
                     </button>
                   ))}
                 </div>
@@ -1073,155 +1106,70 @@ export const RecognitionView: React.FC = () => {
       </div>
 
       {/* ============================================================ */}
-      {/* PRE-INSTALLED SIGNS VOCABULARY & QUICK REFERENCE GUIDE        */}
+      {/* PRE-INSTALLED SIGNS VOCABULARY: INDIAN SIGN LANGUAGE (ISL)   */}
       {/* ============================================================ */}
       <Card
         compact
-        title="Pre-Installed Sign Language Corpus (Low-Level AI Model Vocabulary)"
+        title="भारतीय सांकेतिक भाषा शब्दकोश (Indian Sign Language - ISL Corpus)"
         actions={
-          <Badge variant="indigo" size="sm">
-            20 Trained Classes Active
-          </Badge>
+          <div className="flex items-center gap-1.5">
+            <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-orange-100 text-orange-800 border border-orange-200">
+              🇮🇳 ISL / हिन्दी
+            </span>
+            <Badge variant="green" size="sm">
+              20 संकेत सक्रिय
+            </Badge>
+          </div>
         }
       >
         <div className="space-y-3">
-          <p className="text-xs text-slate-500">
-            These foundational signs are pre-installed and calibrated into the model. Show any of these hand postures to the live camera and the system will translate and pronounce them in real-time.
+          <p className="text-xs text-slate-600 leading-relaxed">
+            यह प्रणाली <strong>भारतीय सांकेतिक भाषा (ISL)</strong> के लिए विशेष रूप से कैलिब्रेट की गई है। नीचे दिए गए किसी भी संकेत को कैमरे के सामने दिखाएँ, सिस्टम तुरंत उसे <strong>हिंदी और अंग्रेजी</strong> में अनुवाद करेगा और स्पष्ट हिंदी आवाज़ में बोलकर सुनाएगा।
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {[
-              {
-                sign: 'Drink',
-                category: 'Essentials',
-                icon: '🥤',
-                posture: 'C-handshape curved cup tilted towards the mouth.',
-              },
-              {
-                sign: 'Eat',
-                category: 'Essentials',
-                icon: '🍽️',
-                posture: 'All 5 fingertips pinched together pointing to mouth.',
-              },
-              {
-                sign: 'Say',
-                category: 'Dialogue',
-                icon: '🗣️',
-                posture: 'Index finger extended under the chin pointing outward.',
-              },
-              {
-                sign: 'What',
-                category: 'Questions',
-                icon: '❓',
-                posture: 'Open palms facing forward/up with fingers spread wide.',
-              },
-              {
-                sign: 'Where',
-                category: 'Questions',
-                icon: '📍',
-                posture: 'Index finger pointing straight up, other fingers curled.',
-              },
-              {
-                sign: 'Why',
-                category: 'Questions',
-                icon: '💡',
-                posture: 'Y-handshape: thumb & pinky extended outward, middle 3 curled.',
-              },
-              {
-                sign: 'Who',
-                category: 'Questions',
-                icon: '👤',
-                posture: 'L-handshape: thumb & index extended at 90 degrees.',
-              },
-              {
-                sign: 'Which',
-                category: 'Questions',
-                icon: '⚖️',
-                posture: 'A-handshape fist with thumb pointing straight up.',
-              },
-              {
-                sign: 'Okay',
-                category: 'Responses',
-                icon: '👌',
-                posture: 'Thumb & index tips touching (O-circle), other 3 upright.',
-              },
-              {
-                sign: 'Peace',
-                category: 'Conversational',
-                icon: '✌️',
-                posture: 'Index & middle fingers extended in a V-sign.',
-              },
-              {
-                sign: 'I Love You',
-                category: 'Conversational',
-                icon: '🤟',
-                posture: 'Thumb, index, and pinky extended, middle 2 curled.',
-              },
-              {
-                sign: 'Hello',
-                category: 'Greetings',
-                icon: '👋',
-                posture: 'Open flat hand with fingers extended straight.',
-              },
-              {
-                sign: 'Thank You',
-                category: 'Greetings',
-                icon: '🙏',
-                posture: 'Flat palm moving forward from chin or mouth.',
-              },
-              {
-                sign: 'Yes',
-                category: 'Responses',
-                icon: '👍',
-                posture: 'Thumbs-up upright gesture or nodding fist.',
-              },
-              {
-                sign: 'No',
-                category: 'Responses',
-                icon: '👎',
-                posture: 'Snapping index and middle against thumb or closed fist.',
-              },
-              {
-                sign: 'Fist',
-                category: 'Postures',
-                icon: '✊',
-                posture: 'All 5 fingers curled tightly into a closed ball.',
-              },
-            ].map((item) => (
+            {Object.values(ISL_TRANSLATIONS).map((item) => (
               <div
-                key={item.sign}
-                className="p-3 rounded-lg border border-slate-200 bg-white hover:border-indigo-300 hover:shadow-xs transition-all space-y-2 flex flex-col justify-between"
+                key={item.english}
+                className="p-3 rounded-lg border border-slate-200 bg-white hover:border-orange-300 hover:shadow-xs transition-all space-y-2 flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                    <span className="text-base font-bold text-slate-900 flex items-center gap-1.5">
                       <span>{item.icon}</span>
-                      <span>{item.sign}</span>
+                      <span>{item.hindi}</span>
                     </span>
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-100 text-slate-600">
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-orange-50 text-orange-700 border border-orange-200">
                       {item.category}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-1 leading-snug">{item.posture}</p>
+
+                  <div className="text-[11px] font-semibold text-slate-700 mt-0.5">
+                    {item.transliteration} <span className="font-normal text-slate-400">({item.english})</span>
+                  </div>
+
+                  <p className="text-[11px] text-slate-500 mt-1.5 leading-snug">
+                    {item.islDescription}
+                  </p>
                 </div>
 
-                <div className="flex items-center gap-1.5 pt-1 border-t border-slate-100">
+                <div className="flex items-center gap-1.5 pt-2 border-t border-slate-100">
                   <button
                     type="button"
-                    onClick={() => SpeechService.speak(item.sign, true)}
-                    className="flex-1 py-1 rounded bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 text-[10px] font-medium flex items-center justify-center gap-1 transition-colors"
+                    onClick={() => SpeechService.speak(item.spokenHindi, true, 'hi-IN')}
+                    className="flex-1 py-1 rounded bg-orange-50 hover:bg-orange-100 text-orange-800 text-[11px] font-semibold flex items-center justify-center gap-1 transition-colors cursor-pointer"
                   >
-                    <Volume2 className="w-3 h-3 text-indigo-600" />
-                    <span>Listen</span>
+                    <Volume2 className="w-3.5 h-3.5 text-orange-600" />
+                    <span>सुनें (Listen)</span>
                   </button>
 
                   <button
                     type="button"
-                    onClick={() => setTeachLabel(item.sign)}
-                    className="py-1 px-2 rounded border border-slate-200 hover:border-indigo-300 text-slate-600 hover:text-slate-900 text-[10px] font-medium"
-                    title="Select in Quick Teach"
+                    onClick={() => setTeachLabel(item.english)}
+                    className="py-1 px-2.5 rounded border border-slate-200 hover:border-indigo-300 text-slate-600 hover:text-slate-900 text-[11px] font-medium cursor-pointer"
+                    title="इस संकेत को सीखें"
                   >
-                    Select
+                    चुनें
                   </button>
                 </div>
               </div>

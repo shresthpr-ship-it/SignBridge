@@ -48,7 +48,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>('overview');
   const [selectedLanguage, setSelectedLanguage] = useState<string>(() => {
-    return localStorage.getItem('signbridge_selected_language') || 'ASL';
+    return localStorage.getItem('signbridge_selected_language') || 'ISL';
   });
   const [selectedSign, setSelectedSign] = useState<string>('Hello');
   const [selectedSplit, setSelectedSplit] = useState<'train' | 'val' | 'test'>('train');
