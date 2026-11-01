@@ -842,8 +842,13 @@ export const RecognitionView: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="text-[10px] text-slate-500 font-mono">
-                  {continuousSession?.total_tokens_recognized || 0} signs in sequence
+                <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
+                  {continuousSession?.stable_candidate && (
+                    <span className="px-1.5 py-0.5 rounded bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold animate-pulse">
+                      Holding: {continuousSession.stable_candidate.toUpperCase()} ({continuousSession.stable_candidate_frames}/2)
+                    </span>
+                  )}
+                  <span>{continuousSession?.total_tokens_recognized || 0} signs in sequence</span>
                 </div>
               </div>
 

@@ -47,7 +47,7 @@ class ContinuousSignRecognizer:
     and sequence aggregation.
     """
 
-    def __init__(self, window_size: int = 8, min_consensus_frames: int = 4, confidence_threshold: float = 72.0):
+    def __init__(self, window_size: int = 8, min_consensus_frames: int = 2, confidence_threshold: float = 60.0):
         self.session_id: str = f"session_{int(time.time())}"
         self.session_start_time: float = time.time()
         self.window_size = window_size
@@ -113,14 +113,11 @@ class ContinuousSignRecognizer:
         self.last_wrist_pos = cur_pos
 
         # Determine motion state based on velocity
-        # High velocity (> 1.25) -> hand in rapid motion transition between signs
-        # Low velocity (< 0.85) -> hand held in signing posture (stroke/hold phase)
-        if self.current_motion_energy > 1.25:
+        # High velocity (> 2.0) -> hand in rapid motion transition between signs
+        # Low velocity (<= 2.0) -> hand held in signing posture (stroke/hold phase)
+        if self.current_motion_energy > 2.0:
             self.motion_state = "transition"
             self.was_in_transition = True
-        elif cur_pos[1] > 0.90:  # Hand dropped near bottom of frame
-            self.motion_state = "idle"
-            self.time_since_last_neutral = now
         else:
             self.motion_state = "signing"
 
@@ -142,7 +139,7 @@ class ContinuousSignRecognizer:
             self.frame_buffer.pop(0)
 
         # 4. Temporal Consensus & Boundary Segmentation
-        if pred_sign and conf_score >= self.confidence_threshold and self.motion_state in ["signing", "transition"]:
+        if pred_sign and conf_score >= self.confidence_threshold:
             if pred_sign == self.current_candidate:
                 self.candidate_frame_count += 1
                 self.candidate_confidences.append(conf_score)
@@ -204,11 +201,6 @@ class ContinuousSignRecognizer:
         if sign == self.last_committed_sign:
             if time_since_last_commit < 1.6 or not self.was_in_transition:
                 return  # Sustained hold of the same sign, do not duplicate token
-
-        # If a new sign:
-        # Enforce minimum hold time (e.g. 150ms) to ensure it wasn't an accidental glitch
-        if duration_ms < 140:
-            return
 
         token_id = f"tok_{int(now * 1000)}_{len(self.active_sequence)}"
         token = SignToken(
@@ -298,6 +290,18 @@ class ContinuousSignRecognizer:
         raw_gloss = [t.sign for t in self.active_sequence]
         last_commit_ago = (now - self.last_committed_time) if self.last_committed_time > 0 else 0.0
 
+        # If active_sequence has committed tokens, use the multi-token sentence
+        # If active_sequence is empty, but we have a stable candidate or current recognized sign,
+        # provide a live provisional sentence so the user immediately sees translation feedback
+        effective_sentence = self.current_sentence
+        if not effective_sentence and not self.active_sequence:
+            provisional_sign = self.current_candidate or cur_sign
+            if provisional_sign and (cur_conf or 0) >= 50.0:
+                provisional = sentence_generation_service.generate_sentence([provisional_sign], [cur_conf or 80.0])
+                provisional.grammar_pattern = "Live Provisional (Active Gesture)"
+                provisional.is_complete = False
+                effective_sentence = provisional
+
         return ContinuousSessionSnapshot(
             session_id=self.session_id,
             is_active=True,
@@ -309,7 +313,7 @@ class ContinuousSignRecognizer:
             stable_candidate_frames=self.candidate_frame_count,
             active_sequence=self.active_sequence,
             raw_gloss_sequence=raw_gloss,
-            generated_sentence=self.current_sentence,
+            generated_sentence=effective_sentence,
             total_tokens_recognized=len(self.active_sequence),
             session_duration_s=round(now - self.session_start_time, 1),
             last_commit_time_ago_s=round(last_commit_ago, 1),
