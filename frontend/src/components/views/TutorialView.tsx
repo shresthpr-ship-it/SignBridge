@@ -9,6 +9,10 @@ import {
   HelpCircle,
   AlertCircle,
   Award,
+  Layers,
+  Eye,
+  EyeOff,
+  Check,
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -22,7 +26,9 @@ import {
   getAllISLCategories,
 } from '../../utils/islDictionary';
 import { SpeechService } from '../../utils/speech';
-import { drawFullFrameLandmarks } from '../../utils/handRenderer';
+import { drawFullFrameLandmarks, HAND_CONNECTIONS } from '../../utils/handRenderer';
+import { getCanonicalLandmarks } from '../../utils/islLandmarks';
+import { LandmarkPoseVisualizer } from './LandmarkPoseVisualizer';
 
 interface TutorialViewProps {
   isPopout?: boolean;
@@ -45,6 +51,7 @@ export const TutorialView: React.FC<TutorialViewProps> = ({ isPopout = false }) 
   const [detectedSign, setDetectedSign] = useState<string | null>(null);
   const [isSignMastered, setIsSignMastered] = useState<boolean>(false);
   const [masteryHoldMs, setMasteryHoldMs] = useState<number>(0);
+  const [showGhostGuide, setShowGhostGuide] = useState<boolean>(true);
 
   // Video & Canvas Refs for Practice Modal
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -88,7 +95,7 @@ export const TutorialView: React.FC<TutorialViewProps> = ({ isPopout = false }) 
     const popup = window.open(
       popoutUrl,
       'ISL_Tutorial_Companion',
-      'width=1200,height=840,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes'
+      'width=1240,height=860,menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes'
     );
     if (popup) {
       popup.focus();
@@ -233,6 +240,7 @@ export const TutorialView: React.FC<TutorialViewProps> = ({ isPopout = false }) 
           if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
+              // 1. Draw User's Live Detected Landmarks
               const frameData = {
                 frame_index: 0,
                 timestamp_ms: 0,
@@ -251,6 +259,61 @@ export const TutorialView: React.FC<TutorialViewProps> = ({ isPopout = false }) 
                   showFace: false,
                 }
               );
+
+              // 2. Draw Target Silhouette Ghost Guide if enabled
+              if (showGhostGuide && practiceSign) {
+                const targetLms = getCanonicalLandmarks(practiceSign.english);
+                if (targetLms && targetLms.length >= 21) {
+                  ctx.save();
+                  // Dashed guide skeleton lines
+                  ctx.setLineDash([6, 5]);
+                  ctx.strokeStyle = matchScore > 0 ? 'rgba(52, 211, 153, 0.9)' : 'rgba(56, 189, 248, 0.7)';
+                  ctx.lineWidth = 2.5;
+
+                  for (const [s, e] of HAND_CONNECTIONS) {
+                    const p1 = targetLms[s];
+                    const p2 = targetLms[e];
+                    if (p1 && p2) {
+                      ctx.beginPath();
+                      ctx.moveTo(p1.x * canvas.width, p1.y * canvas.height);
+                      ctx.lineTo(p2.x * canvas.width, p2.y * canvas.height);
+                      ctx.stroke();
+                    }
+                  }
+
+                  // Joint guide nodes
+                  ctx.setLineDash([]);
+                  for (let i = 0; i < targetLms.length; i++) {
+                    const p = targetLms[i];
+                    ctx.beginPath();
+                    ctx.arc(p.x * canvas.width, p.y * canvas.height, i === 0 ? 6 : 4, 0, Math.PI * 2);
+                    ctx.fillStyle = matchScore > 0 ? '#10b981' : '#38bdf8';
+                    ctx.fill();
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                  }
+
+                  // Guide label banner on top of canvas
+                  ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+                  ctx.fillRect(canvas.width / 2 - 95, 12, 190, 24);
+                  ctx.strokeStyle = matchScore > 0 ? '#10b981' : '#38bdf8';
+                  ctx.lineWidth = 1;
+                  ctx.strokeRect(canvas.width / 2 - 95, 12, 190, 24);
+
+                  ctx.fillStyle = matchScore > 0 ? '#6ee7b7' : '#bae6fd';
+                  ctx.font = 'bold 10px Inter, monospace';
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'middle';
+                  ctx.fillText(
+                    matchScore > 0 ? '✓ ALIGNED WITH TARGET' : 'ALIGN HAND TO SKELETON GHOST',
+                    canvas.width / 2,
+                    24
+                  );
+
+                  ctx.restore();
+                }
+              }
             }
           }
         }
@@ -271,7 +334,7 @@ export const TutorialView: React.FC<TutorialViewProps> = ({ isPopout = false }) 
       isMounted = false;
       if (timerId) clearTimeout(timerId);
     };
-  }, [practiceSign, isCameraActive, isSignMastered]);
+  }, [practiceSign, isCameraActive, isSignMastered, showGhostGuide, matchScore]);
 
   // Clean up camera on unmount
   useEffect(() => {
@@ -288,15 +351,15 @@ export const TutorialView: React.FC<TutorialViewProps> = ({ isPopout = false }) 
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-indigo-600" />
-              Indian Sign Language (ISL) Interactive Tutorial
+              Indian Sign Language (ISL) Interactive Tutorial & Landmark Guide
             </h1>
             <Badge variant="indigo" size="sm">
               ISLRTC Grounded
             </Badge>
           </div>
           <p className="text-xs text-slate-600 mt-1 max-w-3xl">
-            Official ISL signs, handshape topologies, movement directions, and bilingual spoken translations (English + हिन्दी).
-            Click &ldquo;Practice on Camera&rdquo; on any sign to get instant real-time AI recognition feedback.
+            Learn authentic ISL signs with 21-point AI landmark topology models, finger placement maps, and bilingual spoken audio.
+            Each sign card shows the anatomical AI landmark diagram showing exactly how to position your fingers and palm.
           </p>
         </div>
 
@@ -335,7 +398,7 @@ export const TutorialView: React.FC<TutorialViewProps> = ({ isPopout = false }) 
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
                 >
                   Clear
                 </button>
@@ -373,7 +436,7 @@ export const TutorialView: React.FC<TutorialViewProps> = ({ isPopout = false }) 
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
                   selectedCategory === cat
-                    ? 'bg-indigo-600 text-white shadow-xs'
+                    ? 'bg-indigo-600 text-white shadow-xs font-semibold'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
@@ -395,107 +458,129 @@ export const TutorialView: React.FC<TutorialViewProps> = ({ isPopout = false }) 
         </span>
       </div>
 
-      {/* Grid of ISL Signs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filteredSigns.map(([key, sign]) => (
-          <div
-            key={key}
-            className="group relative rounded-lg border border-slate-200 bg-white p-4 shadow-xs hover:shadow-md hover:border-indigo-300 transition-all flex flex-col justify-between space-y-3"
-          >
-            {/* Top Card Bar: Category, Handedness & Audio Icon */}
-            <div>
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <Badge variant="indigo" size="sm">
-                    {sign.category}
-                  </Badge>
-                  {sign.handedness && (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
-                      {sign.handedness}
-                    </span>
-                  )}
+      {/* Grid of ISL Signs with Landmark Diagrams */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        {filteredSigns.map(([key, sign]) => {
+          const canonicalLms = getCanonicalLandmarks(key) || getCanonicalLandmarks(sign.english);
+
+          return (
+            <div
+              key={key}
+              className="group relative rounded-lg border border-slate-200 bg-white p-4 shadow-xs hover:shadow-md hover:border-indigo-300 transition-all flex flex-col justify-between space-y-3"
+            >
+              <div>
+                {/* Top Card Bar: Category, Handedness & Audio Icon */}
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <Badge variant="indigo" size="sm">
+                      {sign.category}
+                    </Badge>
+                    {sign.handedness && (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                        {sign.handedness}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Pronounce TTS Action */}
+                  <button
+                    type="button"
+                    onClick={(e) => handlePronounce(sign, e)}
+                    title={`Pronounce "${sign.english}" in Hindi and English`}
+                    className="p-1.5 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+                  >
+                    <Volume2 className="w-4 h-4" />
+                  </button>
                 </div>
 
-                {/* Pronounce TTS Action */}
-                <button
-                  type="button"
-                  onClick={(e) => handlePronounce(sign, e)}
-                  title={`Pronounce "${sign.english}" in Hindi and English`}
-                  className="p-1.5 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
-                >
-                  <Volume2 className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Main Heading: Icon + English + Hindi */}
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl shrink-0 group-hover:scale-105 transition-transform">
-                  {sign.icon || '✋'}
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 tracking-tight leading-tight">
-                    {sign.english}
-                  </h3>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-sm font-semibold text-emerald-700 font-sans">
-                      {sign.hindi}
-                    </span>
-                    <span className="text-[11px] text-slate-500 font-mono">
-                      ({sign.spokenPhonetic})
-                    </span>
+                {/* Main Heading: Icon + English + Hindi */}
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-2xl shrink-0 group-hover:scale-105 transition-transform">
+                    {sign.icon || '✋'}
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 tracking-tight leading-tight">
+                      {sign.english}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-sm font-semibold text-emerald-700 font-sans">
+                        {sign.hindi}
+                      </span>
+                      <span className="text-[11px] text-slate-500 font-mono">
+                        ({sign.spokenPhonetic})
+                      </span>
+                    </div>
                   </div>
                 </div>
+
+                {/* AI Landmark Hand Placement Visualizer Canvas */}
+                <div className="mt-3 space-y-1">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-slate-500">
+                    <span className="font-semibold text-slate-700 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-indigo-500" />
+                      Landmark Placement Map
+                    </span>
+                    <span className="text-[9px] text-slate-400">21 3D Joint Keypoints</span>
+                  </div>
+                  <LandmarkPoseVisualizer
+                    signName={sign.english}
+                    landmarks={canonicalLms}
+                    width={290}
+                    height={160}
+                    className="w-full"
+                  />
+                </div>
+
+                {/* ISL Detailed Motion & Handshape Description */}
+                <div className="mt-3 p-2.5 rounded bg-slate-50 border border-slate-200/80 text-xs text-slate-700 leading-relaxed">
+                  <strong className="block text-[10px] uppercase font-mono tracking-wider text-slate-500 mb-1">
+                    How to Position & Sign in ISL:
+                  </strong>
+                  <span>{sign.islDescription}</span>
+                </div>
+
+                {/* Cultural / Grammatical Tip */}
+                {sign.tips && (
+                  <p className="mt-2 text-[11px] text-amber-800 bg-amber-50/80 border border-amber-200/60 p-2 rounded flex items-start gap-1.5 leading-snug">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                    <span>
+                      <strong>ISL Tip:</strong> {sign.tips}
+                    </span>
+                  </p>
+                )}
               </div>
 
-              {/* ISL Detailed Motion & Handshape Description */}
-              <div className="mt-3 p-2.5 rounded bg-slate-50 border border-slate-200/80 text-xs text-slate-700 leading-relaxed">
-                <strong className="block text-[10px] uppercase font-mono tracking-wider text-slate-500 mb-1">
-                  How to Sign in ISL:
-                </strong>
-                <span>{sign.islDescription}</span>
+              {/* Card Action Buttons */}
+              <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="w-full text-xs"
+                  leftIcon={<Camera className="w-3.5 h-3.5" />}
+                  onClick={() => {
+                    setPracticeSign(sign);
+                    setIsSignMastered(false);
+                    setMasteryHoldMs(0);
+                    startPracticeCamera();
+                  }}
+                >
+                  Practice on Camera
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="shrink-0 text-xs"
+                  leftIcon={<Volume2 className="w-3.5 h-3.5 text-indigo-600" />}
+                  onClick={(e) => handlePronounce(sign, e)}
+                  title="Speak bilingual pronunciation"
+                >
+                  Pronounce
+                </Button>
               </div>
-
-              {/* Cultural / Grammatical Tip */}
-              {sign.tips && (
-                <p className="mt-2 text-[11px] text-amber-800 bg-amber-50/80 border border-amber-200/60 p-2 rounded flex items-start gap-1.5 leading-snug">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>ISL Tip:</strong> {sign.tips}
-                  </span>
-                </p>
-              )}
             </div>
-
-            {/* Card Action Buttons */}
-            <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
-              <Button
-                variant="primary"
-                size="sm"
-                className="w-full text-xs"
-                leftIcon={<Camera className="w-3.5 h-3.5" />}
-                onClick={() => {
-                  setPracticeSign(sign);
-                  setIsSignMastered(false);
-                  setMasteryHoldMs(0);
-                  startPracticeCamera();
-                }}
-              >
-                Practice on Camera
-              </Button>
-
-              <Button
-                variant="secondary"
-                size="sm"
-                className="shrink-0 text-xs"
-                leftIcon={<Volume2 className="w-3.5 h-3.5 text-indigo-600" />}
-                onClick={(e) => handlePronounce(sign, e)}
-                title="Speak bilingual pronunciation"
-              >
-                Pronounce
-              </Button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Empty Search State */}
@@ -522,14 +607,14 @@ export const TutorialView: React.FC<TutorialViewProps> = ({ isPopout = false }) 
       )}
 
       {/* ============================================================== */}
-      {/* PRACTICE ON CAMERA INTERACTIVE MODAL                          */}
+      {/* PRACTICE ON CAMERA INTERACTIVE MODAL WITH SPLIT-SCREEN GUIDE    */}
       {/* ============================================================== */}
       {practiceSign && (
         <Modal
           isOpen={true}
           onClose={handleClosePractice}
           title={`Practice Sign: ${practiceSign.english} (${practiceSign.hindi})`}
-          subtitle={`Follow the ISL instructions below and hold the gesture in front of your camera.`}
+          subtitle={`Align your hand with the AI landmark placement silhouette and hold steady.`}
           maxWidth="xl"
           footer={
             <div className="flex items-center justify-between w-full">
@@ -572,118 +657,187 @@ export const TutorialView: React.FC<TutorialViewProps> = ({ isPopout = false }) 
               </Badge>
             </div>
 
-            {/* Video Viewport & Skeleton Canvas */}
-            <div className="relative w-full aspect-4/3 bg-slate-950 rounded-lg overflow-hidden border border-slate-800 flex items-center justify-center">
-              {/* Camera Video Feed */}
-              <video
-                ref={videoRef}
-                playsInline
-                muted
-                className={`w-full h-full object-cover transform -scale-x-100 ${
-                  !isCameraActive ? 'hidden' : 'block'
-                }`}
-              />
-
-              {/* MediaPipe Hand Landmarks Canvas */}
-              <canvas
-                ref={canvasRef}
-                width={640}
-                height={480}
-                className={`absolute inset-0 w-full h-full object-cover z-10 pointer-events-none transform -scale-x-100 ${
-                  !isCameraActive ? 'hidden' : 'block'
-                }`}
-              />
-
-              {/* Inactive Standby */}
-              {!isCameraActive && (
-                <div className="text-center p-6 space-y-3 z-20">
-                  <div className="w-12 h-12 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 mx-auto">
-                    <Camera className="w-6 h-6" />
-                  </div>
-                  <p className="text-xs text-slate-300">Camera is paused or initializing.</p>
-                  <Button
-                    size="sm"
-                    onClick={startPracticeCamera}
-                    disabled={isRequestingCamera}
-                    leftIcon={<Camera className="w-3.5 h-3.5" />}
-                  >
-                    {isRequestingCamera ? 'Connecting...' : 'Start Camera'}
-                  </Button>
-                </div>
-              )}
-
-              {/* Camera Error Alert */}
-              {cameraError && (
-                <div className="absolute inset-x-4 top-4 z-30 p-3 bg-rose-950/90 border border-rose-800 text-rose-200 text-xs rounded flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-                  <span>{cameraError}</span>
-                </div>
-              )}
-
-              {/* Live Recognition Evaluation Pill Overlay */}
-              {isCameraActive && (
-                <div className="absolute top-3 left-3 z-20 flex items-center gap-2">
-                  <span className="px-2.5 py-1 rounded bg-slate-900/85 border border-slate-700 text-xs font-mono text-slate-200">
-                    Target: <strong className="text-indigo-400">{practiceSign.english}</strong>
-                  </span>
-                  {detectedSign && (
-                    <span className="px-2.5 py-1 rounded bg-slate-900/85 border border-slate-700 text-xs font-mono text-slate-300">
-                      Detected: <strong className="text-amber-400">{detectedSign}</strong>
+            {/* Main Dual-Column Practice Area */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+              {/* Left Column: Target AI Landmark Pose Model (5 cols) */}
+              <div className="lg:col-span-5 space-y-3">
+                <div className="p-3 bg-slate-900 border border-slate-800 rounded-lg text-white space-y-2">
+                  <div className="flex items-center justify-between text-[11px] font-mono text-slate-300">
+                    <span className="font-semibold text-indigo-400 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" />
+                      Target Pose Model
                     </span>
-                  )}
+                    <span>ISL Canonical</span>
+                  </div>
+                  <LandmarkPoseVisualizer
+                    signName={practiceSign.english}
+                    landmarks={getCanonicalLandmarks(practiceSign.english)}
+                    width={280}
+                    height={190}
+                    className="w-full"
+                  />
+                  <div className="text-[11px] text-slate-300 space-y-1 pt-1 border-t border-slate-800">
+                    <strong className="block text-indigo-300 text-[10px] font-mono uppercase tracking-wider">
+                      Position Checklist:
+                    </strong>
+                    <div className="grid grid-cols-2 gap-1 text-[10px] font-mono text-slate-400">
+                      <span className="flex items-center gap-1">
+                        <Check className="w-3 h-3 text-emerald-400" />
+                        Wrist: Center View
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Check className="w-3 h-3 text-emerald-400" />
+                        Hand: {practiceSign.handedness || '1 Hand'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              )}
 
-              {/* Match Feedback Ribbon & Celebration Banner */}
-              {isCameraActive && matchScore > 0 && (
-                <div className="absolute bottom-3 inset-x-3 z-20">
-                  <div
-                    className={`p-3 rounded-lg border backdrop-blur-md transition-all ${
-                      isSignMastered
-                        ? 'bg-emerald-950/90 border-emerald-600 text-emerald-100 shadow-lg'
-                        : 'bg-indigo-950/85 border-indigo-700 text-indigo-100'
+                {/* Ghost Guide Toggle */}
+                <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between text-xs">
+                  <span className="font-medium text-slate-700 flex items-center gap-1.5">
+                    <Layers className="w-3.5 h-3.5 text-indigo-600" />
+                    Target Ghost Overlay
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowGhostGuide(!showGhostGuide)}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold border transition-all cursor-pointer ${
+                      showGhostGuide
+                        ? 'bg-indigo-600 border-indigo-700 text-white'
+                        : 'bg-white border-slate-300 text-slate-700'
                     }`}
                   >
-                    <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
-                      <span className="flex items-center gap-1.5">
-                        {isSignMastered ? (
-                          <>
-                            <Award className="w-4 h-4 text-emerald-400 animate-bounce" />
-                            <span>Sign Mastered! Excellent Execution!</span>
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="w-4 h-4 text-amber-400 animate-spin" />
-                            <span>Matching Gesture... Hold steadily!</span>
-                          </>
-                        )}
-                      </span>
-                      <span className="font-mono text-xs">{matchScore}% Match</span>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-150 ${
-                          isSignMastered ? 'bg-emerald-400' : 'bg-indigo-400'
-                        }`}
-                        style={{
-                          width: `${Math.min(100, Math.round((masteryHoldMs / 1200) * 100))}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
+                    {showGhostGuide ? (
+                      <>
+                        <Eye className="w-3 h-3" />
+                        Enabled
+                      </>
+                    ) : (
+                      <>
+                        <EyeOff className="w-3 h-3" />
+                        Disabled
+                      </>
+                    )}
+                  </button>
                 </div>
-              )}
+              </div>
+
+              {/* Right Column: Live Camera with Target Alignment Ghost (7 cols) */}
+              <div className="lg:col-span-7 space-y-2">
+                <div className="relative w-full aspect-4/3 bg-slate-950 rounded-lg overflow-hidden border border-slate-800 flex items-center justify-center">
+                  {/* Camera Video Feed */}
+                  <video
+                    ref={videoRef}
+                    playsInline
+                    muted
+                    className={`w-full h-full object-cover transform -scale-x-100 ${
+                      !isCameraActive ? 'hidden' : 'block'
+                    }`}
+                  />
+
+                  {/* MediaPipe Hand Landmarks & Ghost Guide Canvas */}
+                  <canvas
+                    ref={canvasRef}
+                    width={640}
+                    height={480}
+                    className={`absolute inset-0 w-full h-full object-cover z-10 pointer-events-none transform -scale-x-100 ${
+                      !isCameraActive ? 'hidden' : 'block'
+                    }`}
+                  />
+
+                  {/* Inactive Standby */}
+                  {!isCameraActive && (
+                    <div className="text-center p-6 space-y-3 z-20">
+                      <div className="w-12 h-12 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 mx-auto">
+                        <Camera className="w-6 h-6" />
+                      </div>
+                      <p className="text-xs text-slate-300">Camera is paused or initializing.</p>
+                      <Button
+                        size="sm"
+                        onClick={startPracticeCamera}
+                        disabled={isRequestingCamera}
+                        leftIcon={<Camera className="w-3.5 h-3.5" />}
+                      >
+                        {isRequestingCamera ? 'Connecting...' : 'Start Camera'}
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Camera Error Alert */}
+                  {cameraError && (
+                    <div className="absolute inset-x-4 top-4 z-30 p-3 bg-rose-950/90 border border-rose-800 text-rose-200 text-xs rounded flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                      <span>{cameraError}</span>
+                    </div>
+                  )}
+
+                  {/* Live Recognition Evaluation Pill Overlay */}
+                  {isCameraActive && (
+                    <div className="absolute top-3 left-3 z-20 flex items-center gap-2">
+                      <span className="px-2.5 py-1 rounded bg-slate-900/85 border border-slate-700 text-xs font-mono text-slate-200">
+                        Target: <strong className="text-indigo-400">{practiceSign.english}</strong>
+                      </span>
+                      {detectedSign && (
+                        <span className="px-2.5 py-1 rounded bg-slate-900/85 border border-slate-700 text-xs font-mono text-slate-300">
+                          Detected: <strong className="text-amber-400">{detectedSign}</strong>
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Match Feedback Ribbon & Celebration Banner */}
+                  {isCameraActive && matchScore > 0 && (
+                    <div className="absolute bottom-3 inset-x-3 z-20">
+                      <div
+                        className={`p-3 rounded-lg border backdrop-blur-md transition-all ${
+                          isSignMastered
+                            ? 'bg-emerald-950/90 border-emerald-600 text-emerald-100 shadow-lg'
+                            : 'bg-indigo-950/85 border-indigo-700 text-indigo-100'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
+                          <span className="flex items-center gap-1.5">
+                            {isSignMastered ? (
+                              <>
+                                <Award className="w-4 h-4 text-emerald-400 animate-bounce" />
+                                <span>Sign Mastered! Excellent Execution!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="w-4 h-4 text-amber-400 animate-spin" />
+                                <span>Matching Gesture... Hold steadily!</span>
+                              </>
+                            )}
+                          </span>
+                          <span className="font-mono text-xs">{matchScore}% Match</span>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full transition-all duration-150 ${
+                              isSignMastered ? 'bg-emerald-400' : 'bg-indigo-400'
+                            }`}
+                            style={{
+                              width: `${Math.min(100, Math.round((masteryHoldMs / 1200) * 100))}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Quick Practice Tips */}
             <div className="text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded border border-slate-200 space-y-1">
-              <strong className="text-slate-700 block">Practice Guidelines:</strong>
+              <strong className="text-slate-700 block">How to Align Your Hand:</strong>
               <ul className="list-disc list-inside space-y-0.5 text-slate-600">
-                <li>Position your hand 40-70cm from your webcam with good lighting.</li>
-                <li>Keep the gesture steady for at least 1.2 seconds until the green mastery bar fills up.</li>
-                <li>Verify your finger curled/extended positions match the description above.</li>
+                <li>Look at the dashed cyan skeleton on your video feed—place your hand inside the silhouette.</li>
+                <li>When your finger positions match the target posture, the guide turns emerald green.</li>
+                <li>Hold the pose for 1.2 seconds until the mastery achievement bar completes!</li>
               </ul>
             </div>
           </div>
