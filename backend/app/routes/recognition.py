@@ -506,7 +506,66 @@ async def teach_from_frame(
         language=language.strip(),
         landmarks=pts,
         samples_count=8,
-        notes=f"Taught from live frame ({frame_data.hands[0].handedness} hand)"
+        notes=f"Taught from live frame ({frame_data.hands[0].handedness} hand)",
+        auto_train=True
     )
 
     return await teach_gesture(teach_req)
+
+
+@router.delete("/gestures/{label}")
+async def delete_gesture(
+    label: str,
+    purge_samples: bool = Query(True, description="Remove all samples labeled with this sign"),
+    auto_retrain: bool = Query(True, description="Retrain model after deletion")
+):
+    """
+    Deletes a sign gesture from the registered vocabulary and training corpus,
+    then automatically retrains the active classifier.
+    """
+    from app.services.dataset_service import dataset_service
+
+    clean_label = label.strip()
+    classes = dataset_service.get_classes()
+    matching_cls = next((c for c in classes if c["name"].lower() == clean_label.lower() or c["id"] == clean_label), None)
+
+    if not matching_cls:
+        raise HTTPException(status_code=404, detail=f"Sign gesture '{clean_label}' not found in registered vocabulary.")
+
+    actual_name = matching_cls["name"]
+
+    # 1. Remove class
+    remaining_classes = [c for c in classes if c["name"].lower() != actual_name.lower()]
+    dataset_service._save_json(dataset_service.classes_path, remaining_classes)
+
+    # 2. Remove samples
+    deleted_samples = 0
+    if purge_samples:
+        all_samples = dataset_service._read_json(dataset_service.dataset_path)
+        filtered_samples = [s for s in all_samples if s.get("label", "").lower() != actual_name.lower()]
+        deleted_samples = len(all_samples) - len(filtered_samples)
+        dataset_service._save_json(dataset_service.dataset_path, filtered_samples)
+        dataset_service._recompute_class_counts()
+
+    dataset_service.log_activity(
+        "Gesture Deleted",
+        f"Deleted sign '{actual_name}' and removed {deleted_samples} samples from database.",
+        "system"
+    )
+
+    # 3. Retrain model
+    training_result = None
+    if auto_retrain:
+        try:
+            training_result = await train_model()
+        except Exception as e:
+            print(f"[DeleteGesture] Retrain notice: {e}")
+
+    return {
+        "status": "success",
+        "deleted_gesture": actual_name,
+        "deleted_samples": deleted_samples,
+        "model_retrained": training_result is not None,
+        "classes_remaining": len(remaining_classes),
+        "message": f"Sign '{actual_name}' successfully removed from database and model retrained."
+    }

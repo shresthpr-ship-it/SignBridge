@@ -317,6 +317,19 @@ class ApiService {
     return await response.json();
   }
 
+  async deleteGesture(label: string): Promise<{
+    status: string;
+    deleted_gesture: string;
+    deleted_samples: number;
+    model_retrained: boolean;
+    classes_remaining: number;
+    message: string;
+  }> {
+    return this.request(`/recognition/gestures/${encodeURIComponent(label)}`, {
+      method: 'DELETE',
+    });
+  }
+
   // Continuous Sign Recognition & Sentence Generation
   async getContinuousSession(): Promise<ContinuousSessionState> {
     return this.request('/recognition/continuous-session');

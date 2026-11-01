@@ -20,6 +20,10 @@ import {
   Copy,
   Undo2,
   ArrowRight,
+  Edit3,
+  Trash2,
+  RefreshCw,
+  AlertTriangle,
 } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
@@ -40,7 +44,7 @@ import { SpeechService, SpeechAudioMode } from '../../utils/speech';
 import { getISLTranslation, ISL_TRANSLATIONS, ISLTranslation } from '../../utils/islDictionary';
 
 export const RecognitionView: React.FC = () => {
-  const { selectedLanguage, addToast, refreshData } = useApp();
+  const { selectedLanguage, addToast, refreshData, classes } = useApp();
 
   // Camera & Stream states
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
@@ -53,11 +57,15 @@ export const RecognitionView: React.FC = () => {
   // Permission Guardian for cross-device support (HTTPS & Permissions API)
   const cameraPermission = useCameraPermissions();
 
-  // Interactive Teaching / Retraining States
+  // Interactive Teaching, Correction & Retraining States
   const [teachLabel, setTeachLabel] = useState<string>('Eat');
   const [teachLanguage, setTeachLanguage] = useState<string>(selectedLanguage || 'ISL');
   const [isTeaching, setIsTeaching] = useState<boolean>(false);
   const [teachSuccessMsg, setTeachSuccessMsg] = useState<string | null>(null);
+  const [isRetraining, setIsRetraining] = useState<boolean>(false);
+  const [signToDelete, setSignToDelete] = useState<string>('');
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [showManageModal, setShowManageModal] = useState<boolean>(false);
 
   // Sync with global language selector
   useEffect(() => {
@@ -331,23 +339,23 @@ export const RecognitionView: React.FC = () => {
     });
   }, [liveResult, showOverlay, showPoseLayer, showFaceLayer]);
 
-  // Interactive Teaching Action: Learn the gesture from current webcam frame
+  // Interactive Teaching & Immediate Correction: Learn/Correct gesture from current landmarks
   const handleTeachGesture = async (customLabel?: string) => {
     const labelToTeach = (customLabel || teachLabel).trim();
     if (!labelToTeach) {
       addToast({
         type: 'warning',
         title: 'Sign Label Required',
-        message: 'Please specify or select a sign label name (e.g. "Okay").',
+        message: 'Please specify or select a sign label name (e.g. "Namaste").',
       });
       return;
     }
 
-    if (!videoRef.current || !isCameraActive) {
+    if (!isCameraActive) {
       addToast({
         type: 'warning',
         title: 'Camera Offline',
-        message: 'Please start the camera and display your hand gesture to teach.',
+        message: 'Please start the camera and display your hand gesture to teach or correct.',
       });
       return;
     }
@@ -356,32 +364,49 @@ export const RecognitionView: React.FC = () => {
     setTeachSuccessMsg(null);
 
     try {
-      const video = videoRef.current;
-      const offscreen = document.createElement('canvas');
-      offscreen.width = video.videoWidth || 640;
-      offscreen.height = video.videoHeight || 480;
-      const ctx = offscreen.getContext('2d');
-      if (!ctx) throw new Error('Canvas rendering context not available');
+      let res;
+      // High-speed direct landmark submission (ultra-responsive < 250ms)
+      if (liveResult?.landmarks && liveResult.landmarks.length >= 21) {
+        res = await api.teachGesture({
+          label: labelToTeach,
+          language: teachLanguage,
+          landmarks: liveResult.landmarks,
+          samples_count: 8,
+          notes: `Live interactive correction (${liveResult.hands?.[0]?.handedness || 'Active'} hand)`,
+          auto_train: true,
+        });
+      } else if (videoRef.current) {
+        // Fallback: Capture frame blob
+        const video = videoRef.current;
+        const offscreen = document.createElement('canvas');
+        offscreen.width = video.videoWidth || 640;
+        offscreen.height = video.videoHeight || 480;
+        const ctx = offscreen.getContext('2d');
+        if (!ctx) throw new Error('Canvas rendering context not available');
 
-      ctx.drawImage(video, 0, 0, offscreen.width, offscreen.height);
+        ctx.drawImage(video, 0, 0, offscreen.width, offscreen.height);
 
-      const blob: Blob | null = await new Promise((resolve) =>
-        offscreen.toBlob(resolve, 'image/jpeg', 0.9)
-      );
+        const blob: Blob | null = await new Promise((resolve) =>
+          offscreen.toBlob(resolve, 'image/jpeg', 0.85)
+        );
 
-      if (!blob) throw new Error('Failed to encode camera frame');
+        if (!blob) throw new Error('Failed to encode camera frame');
 
-      const res = await api.teachFromFrame(blob, labelToTeach, teachLanguage);
+        res = await api.teachFromFrame(blob, labelToTeach, teachLanguage);
+      } else {
+        throw new Error('No video or hand landmarks available to teach.');
+      }
 
-      const msg = `Learned "${labelToTeach}" (${teachLanguage})! Model retrained with ${res.samples_added} new samples.`;
+      const msg = `Learned "${labelToTeach}" (${teachLanguage})! Model retrained with ${res.samples_added} samples.`;
       setTeachSuccessMsg(msg);
       addToast({
         type: 'success',
-        title: 'Gesture Taught Successfully',
-        message: `Model updated with "${labelToTeach}". You can now hold up your hand to see it recognized!`,
+        title: 'Gesture Corrected & Saved',
+        message: `Saved "${labelToTeach}" to database and updated active model! It will now be recognized.`,
       });
 
-      // Update model status
+      // Clear continuous session buffer so updated prediction takes effect immediately
+      await api.resetContinuousSession();
       const updatedModelStatus = await api.getRecognitionModelStatus();
       setModelStatus(updatedModelStatus);
       await refreshData();
@@ -389,11 +414,64 @@ export const RecognitionView: React.FC = () => {
       console.error('Teach gesture error:', err);
       addToast({
         type: 'error',
-        title: 'Teaching Failed',
+        title: 'Correction Failed',
         message: err.message || 'Could not extract hand landmarks. Ensure hand is clearly in view.',
       });
     } finally {
       setIsTeaching(false);
+    }
+  };
+
+  // Retrain Model On-Demand
+  const handleRetrainModel = async () => {
+    setIsRetraining(true);
+    try {
+      const res = await api.trainModel();
+      const updatedStatus = await api.getRecognitionModelStatus();
+      setModelStatus(updatedStatus);
+      await refreshData();
+      addToast({
+        type: 'success',
+        title: 'Model Retrained',
+        message: `Trained on ${res.train_samples} samples across ${res.num_classes} classes! Accuracy: ${res.train_accuracy}%.`,
+      });
+    } catch (err: any) {
+      console.error('Retrain error:', err);
+      addToast({
+        type: 'error',
+        title: 'Retraining Failed',
+        message: err.message || 'Could not retrain model.',
+      });
+    } finally {
+      setIsRetraining(false);
+    }
+  };
+
+  // Delete Sign Gesture & Purge Associated Samples
+  const handleDeleteGesture = async (labelToDelete: string) => {
+    if (!labelToDelete.trim()) return;
+    setIsDeleting(true);
+    try {
+      const res = await api.deleteGesture(labelToDelete.trim());
+      addToast({
+        type: 'info',
+        title: 'Sign Deleted',
+        message: res.message || `Deleted gesture "${labelToDelete}" and updated model.`,
+      });
+      const updatedStatus = await api.getRecognitionModelStatus();
+      setModelStatus(updatedStatus);
+      await refreshData();
+      setSignToDelete('');
+      setShowManageModal(false);
+    } catch (err: any) {
+      console.error('Delete gesture error:', err);
+      addToast({
+        type: 'error',
+        title: 'Deletion Failed',
+        message: err.message || 'Could not delete gesture.',
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -754,6 +832,219 @@ export const RecognitionView: React.FC = () => {
             </div>
           </Card>
 
+          {/* ============================================================ */}
+          {/* TEACH, CORRECT, RETRAIN & DELETE HUB (Prominently Placed)   */}
+          {/* ============================================================ */}
+          <div id="teach-sign-hub">
+            <Card
+              compact
+              title="Teach This Sign / Correct Gesture"
+              className="border-indigo-300 bg-indigo-50/20 shadow-sm"
+              actions={
+                <div className="flex items-center gap-1.5">
+                  {/* Retrain Button */}
+                  <button
+                    type="button"
+                    onClick={handleRetrainModel}
+                    disabled={isRetraining}
+                    className="px-2.5 py-1 rounded text-[11px] font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 active:scale-95 flex items-center gap-1 shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                    title="Retrain recognition model on current dataset"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 text-indigo-600 ${isRetraining ? 'animate-spin' : ''}`} />
+                    <span>{isRetraining ? 'Retraining...' : 'Retrain'}</span>
+                  </button>
+
+                  {/* Manage / Delete Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => setShowManageModal(!showManageModal)}
+                    className={`px-2.5 py-1 rounded text-[11px] font-semibold border flex items-center gap-1 shadow-xs transition-all cursor-pointer ${
+                      showManageModal
+                        ? 'bg-rose-100 border-rose-300 text-rose-800'
+                        : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+                    }`}
+                    title="Manage or delete gesture classes"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                    <span>Manage / Delete</span>
+                  </button>
+                </div>
+              }
+            >
+              <div className="space-y-3 text-xs">
+                {/* Hand Detection Readiness Status */}
+                <div className="flex items-center justify-between p-2 rounded bg-white border border-slate-200">
+                  <span className="text-[11px] text-slate-600 font-medium">Hand Sensor Status:</span>
+                  <span className={`inline-flex items-center gap-1.5 font-semibold text-[11px] ${
+                    liveResult?.hand_detected ? 'text-emerald-700' : 'text-amber-700'
+                  }`}>
+                    <span className={`w-2.5 h-2.5 rounded-full ${
+                      liveResult?.hand_detected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'
+                    }`} />
+                    {liveResult?.hand_detected ? 'Hand In View (21 3D landmarks ready)' : 'Show Hand to Camera'}
+                  </span>
+                </div>
+
+                {/* Quick Preset Gesture Chips */}
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
+                    त्वरित संकेत चुनें (Quick Select Sign):
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      { label: 'Eat', display: 'खाना (Eat)' },
+                      { label: 'Drink', display: 'पीना (Drink)' },
+                      { label: 'What', display: 'क्या (What)' },
+                      { label: 'Where', display: 'कहाँ (Where)' },
+                      { label: 'Why', display: 'क्यों (Why)' },
+                      { label: 'Who', display: 'कौन (Who)' },
+                      { label: 'Which', display: 'कौनसा (Which)' },
+                      { label: 'Say', display: 'बोलना (Say)' },
+                      { label: 'Okay', display: 'ठीक है (Okay)' },
+                      { label: 'Hello', display: 'नमस्ते (Hello)' },
+                      { label: 'Thank You', display: 'धन्यवाद (Thanks)' },
+                      { label: 'Yes', display: 'हाँ (Yes)' },
+                      { label: 'No', display: 'नहीं (No)' },
+                      { label: 'Peace', display: 'शांति (Peace)' },
+                      { label: 'Help', display: 'मदद (Help)' },
+                      { label: 'I Love You', display: 'प्यार (Love)' },
+                      { label: 'Fist', display: 'मुट्ठी (Fist)' },
+                    ].map((preset) => (
+                      <button
+                        key={preset.label}
+                        type="button"
+                        onClick={() => setTeachLabel(preset.label)}
+                        className={`px-2 py-0.5 rounded text-[11px] font-medium border transition-colors cursor-pointer ${
+                          teachLabel.toLowerCase() === preset.label.toLowerCase()
+                            ? 'bg-amber-600 text-white border-amber-600'
+                            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                        }`}
+                      >
+                        {preset.display}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Custom Sign Name & Language Inputs */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="sm:col-span-2">
+                    <label className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                      Sign Label Name:
+                    </label>
+                    <input
+                      id="teach-sign-input"
+                      type="text"
+                      value={teachLabel}
+                      onChange={(e) => setTeachLabel(e.target.value)}
+                      placeholder="e.g. Okay, Thumbs Up"
+                      className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                      Language:
+                    </label>
+                    <select
+                      value={teachLanguage}
+                      onChange={(e) => setTeachLanguage(e.target.value)}
+                      className="w-full px-2 py-1.5 text-xs bg-white border border-slate-200 rounded font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    >
+                      <option value="ASL">ASL</option>
+                      <option value="ISL">ISL (Indian)</option>
+                      <option value="BSL">BSL (British)</option>
+                      <option value="AUSLAN">AUSLAN</option>
+                      <option value="LSF">LSF (French)</option>
+                      <option value="CUSTOM">Custom</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Success Banner if retrained */}
+                {teachSuccessMsg && (
+                  <div className="p-2 bg-emerald-50 border border-emerald-200 rounded text-emerald-800 text-[11px] flex items-center gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>{teachSuccessMsg}</span>
+                  </div>
+                )}
+
+                {/* Primary Action Button: Teach & Retrain */}
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => handleTeachGesture()}
+                  disabled={isTeaching || !isCameraActive || !liveResult?.hand_detected}
+                  className="w-full cursor-pointer"
+                  leftIcon={
+                    isTeaching ? (
+                      <Sparkles className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <GraduationCap className="w-3.5 h-3.5" />
+                    )
+                  }
+                >
+                  {isTeaching
+                    ? 'Capturing & Retraining Model (<1s)...'
+                    : `Teach "${teachLabel}" & Update Model`}
+                </Button>
+
+                {/* Manage / Delete Gesture Section (Expandable) */}
+                {showManageModal && (
+                  <div className="mt-3 p-3 bg-rose-50/60 border border-rose-200 rounded-lg space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-rose-900 text-xs flex items-center gap-1.5">
+                        <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                        Delete or Purge Gesture
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowManageModal(false)}
+                        className="text-[11px] text-slate-400 hover:text-slate-600 cursor-pointer"
+                      >
+                        Close
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-rose-700 leading-relaxed">
+                      Select a gesture class to delete. This purges all associated landmark samples from the dataset and automatically retrains the active model.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={signToDelete}
+                        onChange={(e) => setSignToDelete(e.target.value)}
+                        className="flex-1 px-2.5 py-1.5 text-xs bg-white border border-rose-300 rounded font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                      >
+                        <option value="">-- Choose Sign to Delete --</option>
+                        {Array.from(
+                          new Set([
+                            ...(modelStatus?.classes || []),
+                            ...classes.map((c) => c.name),
+                          ])
+                        ).sort().map((sign) => (
+                          <option key={sign} value={sign}>
+                            {sign}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        disabled={!signToDelete || isDeleting}
+                        onClick={() => {
+                          if (window.confirm(`Are you sure you want to delete gesture "${signToDelete}" and purge its samples?`)) {
+                            handleDeleteGesture(signToDelete);
+                          }
+                        }}
+                        className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-medium text-xs rounded transition-all disabled:opacity-50 flex items-center gap-1 cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+          </div>
+
           {/* Transparent Architectural Limitation Callout */}
           <Card compact>
             <div className="space-y-2 text-xs text-slate-600">
@@ -1094,6 +1385,27 @@ export const RecognitionView: React.FC = () => {
                           </span>
                         )}
                       </div>
+
+                      {/* 1-Click Gesture Correction Trigger */}
+                      <div className="pt-2 flex justify-center">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (liveResult.predicted_sign) {
+                              setTeachLabel(liveResult.predicted_sign);
+                            }
+                            const hub = document.getElementById('teach-sign-hub');
+                            const input = document.getElementById('teach-sign-input');
+                            if (input) input.focus();
+                            if (hub) hub.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 text-[11px] font-medium transition-all cursor-pointer shadow-xs"
+                          title="Correct this recognition result and update model immediately"
+                        >
+                          <Edit3 className="w-3.5 h-3.5 text-amber-300" />
+                          <span>Wrong? Correct This Gesture</span>
+                        </button>
+                      </div>
                     </div>
                   );
                 })()
@@ -1114,6 +1426,25 @@ export const RecognitionView: React.FC = () => {
                       ? 'Position your hand clearly within the camera boundary.'
                       : liveResult?.recognition_message || 'Movement/posture is below confident recognition threshold.'}
                   </p>
+
+                  {/* If hand is detected but posture unknown, offer 1-click teach */}
+                  {liveResult?.hand_detected && (
+                    <div className="pt-2 flex justify-center">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const hub = document.getElementById('teach-sign-hub');
+                          const input = document.getElementById('teach-sign-input');
+                          if (input) input.focus();
+                          if (hub) hub.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-500/40 text-[11px] font-medium transition-all cursor-pointer"
+                      >
+                        <GraduationCap className="w-3.5 h-3.5 text-indigo-300" />
+                        <span>Teach This Hand Pose as New Sign</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1154,134 +1485,6 @@ export const RecognitionView: React.FC = () => {
                   No alternative candidate scores available for this frame.
                 </p>
               )}
-            </div>
-          </Card>
-
-          {/* Interactive Teach & Instant Retraining Card */}
-          <Card
-            compact
-            title="Teach This Sign / Correct Gesture"
-            className="border-indigo-200 bg-indigo-50/20"
-          >
-            <div className="space-y-3 text-xs">
-              <p className="text-[11px] text-slate-600 leading-relaxed">
-                If the model translates a gesture incorrectly (or you want to teach a new gesture like <strong>"Okay"</strong>), show the gesture to the camera, type or select its name below, and click <strong>Teach & Update Model</strong>.
-              </p>
-
-              {/* Hand Detection Readiness Status */}
-              <div className="flex items-center justify-between p-2 rounded bg-white border border-slate-200">
-                <span className="text-[11px] text-slate-600 font-medium">Hand Sensor Status:</span>
-                <span className={`inline-flex items-center gap-1 font-semibold text-[11px] ${
-                  liveResult?.hand_detected ? 'text-emerald-700' : 'text-amber-700'
-                }`}>
-                  <span className={`w-2 h-2 rounded-full ${
-                    liveResult?.hand_detected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'
-                  }`} />
-                  {liveResult?.hand_detected ? 'Hand In View (21 landmarks ready)' : 'Show Hand to Camera'}
-                </span>
-              </div>
-
-              {/* Quick Preset Gesture Chips */}
-              <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">
-                  त्वरित संकेत चुनें (Quick Select Sign):
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {[
-                    { label: 'Eat', display: 'खाना (Eat)' },
-                    { label: 'Drink', display: 'पीना (Drink)' },
-                    { label: 'What', display: 'क्या (What)' },
-                    { label: 'Where', display: 'कहाँ (Where)' },
-                    { label: 'Why', display: 'क्यों (Why)' },
-                    { label: 'Who', display: 'कौन (Who)' },
-                    { label: 'Which', display: 'कौनसा (Which)' },
-                    { label: 'Say', display: 'बोलना (Say)' },
-                    { label: 'Okay', display: 'ठीक है (Okay)' },
-                    { label: 'Hello', display: 'नमस्ते (Hello)' },
-                    { label: 'Thank You', display: 'धन्यवाद (Thanks)' },
-                    { label: 'Yes', display: 'हाँ (Yes)' },
-                    { label: 'No', display: 'नहीं (No)' },
-                    { label: 'Peace', display: 'शांति (Peace)' },
-                    { label: 'Help', display: 'मदद (Help)' },
-                    { label: 'I Love You', display: 'प्यार (Love)' },
-                    { label: 'Fist', display: 'मुट्ठी (Fist)' },
-                  ].map((preset) => (
-                    <button
-                      key={preset.label}
-                      type="button"
-                      onClick={() => setTeachLabel(preset.label)}
-                      className={`px-2 py-0.5 rounded text-[11px] font-medium border transition-colors ${
-                        teachLabel.toLowerCase() === preset.label.toLowerCase()
-                          ? 'bg-amber-600 text-white border-amber-600'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                      }`}
-                    >
-                      {preset.display}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Custom Sign Name & Language Inputs */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <div className="sm:col-span-2">
-                  <label className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
-                    Sign Label Name:
-                  </label>
-                  <input
-                    type="text"
-                    value={teachLabel}
-                    onChange={(e) => setTeachLabel(e.target.value)}
-                    placeholder="e.g. Okay, Thumbs Up"
-                    className="w-full px-2.5 py-1.5 text-xs bg-white border border-slate-200 rounded font-medium text-slate-900 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
-                    Language:
-                  </label>
-                  <select
-                    value={teachLanguage}
-                    onChange={(e) => setTeachLanguage(e.target.value)}
-                    className="w-full px-2 py-1.5 text-xs bg-white border border-slate-200 rounded font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  >
-                    <option value="ASL">ASL</option>
-                    <option value="ISL">ISL (Indian)</option>
-                    <option value="BSL">BSL (British)</option>
-                    <option value="AUSLAN">AUSLAN</option>
-                    <option value="LSF">LSF (French)</option>
-                    <option value="CUSTOM">Custom</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Success Banner if retrained */}
-              {teachSuccessMsg && (
-                <div className="p-2 bg-emerald-50 border border-emerald-200 rounded text-emerald-800 text-[11px] flex items-center gap-1.5">
-                  <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span>{teachSuccessMsg}</span>
-                </div>
-              )}
-
-              {/* Action Button: Teach & Retrain */}
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => handleTeachGesture()}
-                disabled={isTeaching || !isCameraActive || !liveResult?.hand_detected}
-                className="w-full"
-                leftIcon={
-                  isTeaching ? (
-                    <Sparkles className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <GraduationCap className="w-3.5 h-3.5" />
-                  )
-                }
-              >
-                {isTeaching
-                  ? 'Capturing & Retraining Model (<1s)...'
-                  : `Teach "${teachLabel}" & Update Model`}
-              </Button>
             </div>
           </Card>
 

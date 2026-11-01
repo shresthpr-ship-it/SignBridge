@@ -294,3 +294,30 @@ def test_training_readiness_status():
     assert "viable_classes" in status
     assert "insufficient_classes" in status
     assert "training_pipeline" in status
+
+
+def test_teach_gesture_and_delete_endpoint():
+    # 1. Teach a new test gesture with 21 landmarks
+    dummy_landmarks = [{"x": float(i) * 0.04, "y": float(i) * 0.04, "z": 0.0} for i in range(21)]
+    teach_payload = {
+        "label": "TestGestureUnique123",
+        "language": "ISL",
+        "landmarks": dummy_landmarks,
+        "samples_count": 5,
+        "notes": "Unit test interactive correction",
+        "auto_train": False
+    }
+    teach_resp = client.post("/api/recognition/teach", json=teach_payload)
+    assert teach_resp.status_code == 200
+    res = teach_resp.json()
+    assert res["status"] == "success"
+    assert res["label"] == "TestGestureUnique123"
+    assert res["samples_added"] == 5
+
+    # 2. Delete the gesture and verify samples are purged
+    del_resp = client.delete("/api/recognition/gestures/TestGestureUnique123?purge_samples=true&auto_retrain=false")
+    assert del_resp.status_code == 200
+    del_data = del_resp.json()
+    assert del_data["status"] == "success"
+    assert del_data["deleted_samples"] >= 5
+

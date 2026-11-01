@@ -41,17 +41,54 @@ def create_class(req: CreateSignClassRequest):
     return dataset_service.add_class(name=req.name, category=req.category, description=req.description)
 
 @router.delete("/classes/{class_name}")
-def delete_class(class_name: str):
-    """Delete a sign class. Samples with this label are NOT deleted but lose their class reference."""
+async def delete_class(
+    class_name: str,
+    delete_samples: bool = Query(True, description="Also remove all samples associated with this sign label"),
+    auto_retrain: bool = Query(True, description="Automatically retrain the model after deletion")
+):
+    """Delete a sign class and its associated landmark samples, then update the active model."""
     classes = dataset_service.get_classes()
-    cls = next((c for c in classes if c["name"] == class_name or c["id"] == class_name), None)
+    cls = next((c for c in classes if c["name"].lower() == class_name.lower() or c["id"] == class_name), None)
     if not cls:
         raise HTTPException(status_code=404, detail=f"Class '{class_name}' not found")
-    # Remove from classes file
-    remaining = [c for c in classes if c["name"] != class_name and c["id"] != class_name]
-    dataset_service._save_json(dataset_service.classes_path, remaining)
-    dataset_service.log_activity("Class Deleted", f"Sign class '{class_name}' deleted from vocabulary.", "system")
-    return {"status": "success", "deleted_class": class_name}
+
+    target_name = cls["name"]
+
+    # 1. Remove from classes file
+    remaining_classes = [c for c in classes if c["name"].lower() != target_name.lower() and c["id"] != class_name]
+    dataset_service._save_json(dataset_service.classes_path, remaining_classes)
+
+    deleted_samples_count = 0
+    # 2. Optionally remove associated samples from dataset
+    if delete_samples:
+        all_samples = dataset_service._read_json(dataset_service.dataset_path)
+        filtered_samples = [s for s in all_samples if s.get("label", "").lower() != target_name.lower()]
+        deleted_samples_count = len(all_samples) - len(filtered_samples)
+        dataset_service._save_json(dataset_service.dataset_path, filtered_samples)
+        dataset_service._recompute_class_counts()
+
+    dataset_service.log_activity(
+        "Class Deleted",
+        f"Sign class '{target_name}' deleted along with {deleted_samples_count} samples.",
+        "system"
+    )
+
+    # 3. Retrain if requested
+    training_status = None
+    if auto_retrain:
+        try:
+            from app.routes.recognition import train_model
+            training_status = await train_model()
+        except Exception as e:
+            print(f"[DeleteClass] Retraining note: {e}")
+
+    return {
+        "status": "success",
+        "deleted_class": target_name,
+        "deleted_samples_count": deleted_samples_count,
+        "model_retrained": training_status is not None,
+        "remaining_classes_count": len(remaining_classes)
+    }
 
 @router.get("/samples", response_model=List[SignSample])
 def list_samples(

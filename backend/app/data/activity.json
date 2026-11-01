@@ -1,352 +1,352 @@
 [
   {
-    "id": "act-f4ed8c",
-    "action": "Sample Deleted",
-    "description": "Removed sample smp-bb241557 (TestGesture_Valid) from corpus.",
-    "timestamp": "2026-10-31T15:24:52.332113",
+    "id": "act-4236a9",
+    "action": "Gesture Deleted",
+    "description": "Deleted sign 'TestGestureUnique123' and removed 5 samples from database.",
+    "timestamp": "2026-11-01T03:23:28.701576",
     "category": "system"
   },
   {
-    "id": "act-f6a4e0",
+    "id": "act-f24054",
+    "action": "Gesture Taught",
+    "description": "User taught gesture 'TestGestureUnique123' with 5 sample variations in ISL.",
+    "timestamp": "2026-11-01T03:23:28.481168",
+    "category": "system"
+  },
+  {
+    "id": "act-227b54",
     "action": "Sample Captured",
-    "description": "Logged sample smp-bb241557 for 'TestGesture_Valid' [TEST]. Status: approved",
-    "timestamp": "2026-10-31T15:24:52.165750",
+    "description": "Logged sample smp-83780053 for 'TestGestureUnique123' [TEST]. Status: approved",
+    "timestamp": "2026-11-01T03:23:28.469300",
     "category": "capture"
   },
   {
-    "id": "act-e384e1",
-    "action": "Class Deleted",
-    "description": "Sign class 'TestSignGesture_A' deleted from vocabulary.",
-    "timestamp": "2026-10-31T15:24:51.994254",
-    "category": "system"
+    "id": "act-6416cf",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-6d66f6a4 for 'TestGestureUnique123' [TRAIN]. Status: approved",
+    "timestamp": "2026-11-01T03:23:28.246541",
+    "category": "capture"
   },
   {
-    "id": "act-93ecf7",
+    "id": "act-2ac2a7",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-e8c8a3a6 for 'TestGestureUnique123' [TRAIN]. Status: approved",
+    "timestamp": "2026-11-01T03:23:28.032291",
+    "category": "capture"
+  },
+  {
+    "id": "act-50892f",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-e4c0da11 for 'TestGestureUnique123' [TRAIN]. Status: approved",
+    "timestamp": "2026-11-01T03:23:27.814922",
+    "category": "capture"
+  },
+  {
+    "id": "act-6999bf",
+    "action": "Sample Captured",
+    "description": "Logged sample smp-9457ab6e for 'TestGestureUnique123' [TRAIN]. Status: approved",
+    "timestamp": "2026-11-01T03:23:27.597030",
+    "category": "capture"
+  },
+  {
+    "id": "act-cad5bb",
     "action": "Class Created",
-    "description": "Added new sign label 'TestSignGesture_A' in category 'Testing'",
-    "timestamp": "2026-10-31T15:24:51.948951",
+    "description": "Added new sign label 'TestGestureUnique123' in category 'Taught'",
+    "timestamp": "2026-11-01T03:23:27.369160",
     "category": "class"
   },
   {
-    "id": "act-241023",
-    "action": "Gesture Taught",
-    "description": "User taught gesture 'Namaste' with 8 sample variations in ASL.",
-    "timestamp": "2026-10-31T15:19:59.875556",
-    "category": "system"
-  },
-  {
-    "id": "act-d15c7c",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-18edf211 for 'Namaste' [TEST]. Status: approved",
-    "timestamp": "2026-10-31T15:19:59.860804",
-    "category": "capture"
-  },
-  {
-    "id": "act-86631b",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-ccf3af62 for 'Namaste' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T15:19:59.634722",
-    "category": "capture"
-  },
-  {
-    "id": "act-1cff14",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-49d7664a for 'Namaste' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T15:19:59.407899",
-    "category": "capture"
-  },
-  {
-    "id": "act-68259d",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-ca9e1408 for 'Namaste' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T15:19:59.176139",
-    "category": "capture"
-  },
-  {
-    "id": "act-cd2ec9",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-c18c3834 for 'Namaste' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T15:19:58.953084",
-    "category": "capture"
-  },
-  {
-    "id": "act-4810d0",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-50179e06 for 'Namaste' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T15:19:58.722737",
-    "category": "capture"
-  },
-  {
-    "id": "act-ec62a1",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-75f0ca70 for 'Namaste' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T15:19:58.498825",
-    "category": "capture"
-  },
-  {
-    "id": "act-fbf2d4",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-282d1bd9 for 'Namaste' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T15:19:58.254928",
-    "category": "capture"
-  },
-  {
-    "id": "act-a456d7",
-    "action": "Sample Approved",
-    "description": "Sample smp-369e9a65 (Namaste) was marked as approved.",
-    "timestamp": "2026-10-31T15:07:39.441556",
-    "category": "review"
-  },
-  {
-    "id": "act-3b3fb4",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-369e9a65 for 'Namaste' [TRAIN]. Status: pending_review",
-    "timestamp": "2026-10-31T15:07:32.365207",
-    "category": "capture"
-  },
-  {
-    "id": "act-8bfc42",
-    "action": "Still Image Captured",
-    "description": "Saved image for 'Namaste' [ASL] by signer_gicg. Size: 980 KB.",
-    "timestamp": "2026-10-31T15:07:32.153601",
-    "category": "capture"
-  },
-  {
-    "id": "act-6a69d7",
-    "action": "Gesture Taught",
-    "description": "User taught gesture 'namaste' with 8 sample variations in ASL.",
-    "timestamp": "2026-10-31T15:05:28.111633",
-    "category": "system"
-  },
-  {
-    "id": "act-42d86b",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-1723323f for 'namaste' [TEST]. Status: approved",
-    "timestamp": "2026-10-31T15:05:28.093230",
-    "category": "capture"
-  },
-  {
-    "id": "act-41e718",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-afbe94b6 for 'namaste' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T15:05:27.880343",
-    "category": "capture"
-  },
-  {
-    "id": "act-ed191e",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-321e9420 for 'namaste' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T15:05:27.667975",
-    "category": "capture"
-  },
-  {
-    "id": "act-f8726a",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-72f20eb3 for 'namaste' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T15:05:27.432403",
-    "category": "capture"
-  },
-  {
-    "id": "act-a38c7a",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-adb9c7c6 for 'namaste' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T15:05:27.222330",
-    "category": "capture"
-  },
-  {
-    "id": "act-fd8e39",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-041926bd for 'namaste' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T15:05:27.004615",
-    "category": "capture"
-  },
-  {
-    "id": "act-3e7708",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-9ab1d29e for 'namaste' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T15:05:26.781457",
-    "category": "capture"
-  },
-  {
-    "id": "act-4699a1",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-9486f624 for 'namaste' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T15:05:26.577537",
-    "category": "capture"
-  },
-  {
-    "id": "act-0f9d31",
+    "id": "act-6509f1",
     "action": "Sample Deleted",
-    "description": "Removed sample smp-87b5dbeb (TestGesture_Valid) from corpus.",
-    "timestamp": "2026-10-31T12:14:01.075225",
+    "description": "Removed sample smp-5f578d75 (TestGesture_Valid) from corpus.",
+    "timestamp": "2026-11-01T03:23:26.865104",
     "category": "system"
   },
   {
-    "id": "act-30ed45",
+    "id": "act-794dba",
     "action": "Sample Captured",
-    "description": "Logged sample smp-87b5dbeb for 'TestGesture_Valid' [TEST]. Status: approved",
-    "timestamp": "2026-10-31T12:14:00.913946",
+    "description": "Logged sample smp-5f578d75 for 'TestGesture_Valid' [TEST]. Status: approved",
+    "timestamp": "2026-11-01T03:23:26.611864",
     "category": "capture"
   },
   {
-    "id": "act-d04b26",
+    "id": "act-e6950f",
     "action": "Class Deleted",
-    "description": "Sign class 'TestSignGesture_A' deleted from vocabulary.",
-    "timestamp": "2026-10-31T12:14:00.763015",
+    "description": "Sign class 'TestSignGesture_A' deleted along with 0 samples.",
+    "timestamp": "2026-11-01T03:23:23.593793",
     "category": "system"
   },
   {
-    "id": "act-7dcfbe",
+    "id": "act-c1dd44",
     "action": "Class Created",
     "description": "Added new sign label 'TestSignGesture_A' in category 'Testing'",
-    "timestamp": "2026-10-31T12:14:00.722027",
+    "timestamp": "2026-11-01T03:23:23.356038",
     "category": "class"
   },
   {
-    "id": "act-b5158e",
+    "id": "act-5f9375",
+    "action": "Gesture Deleted",
+    "description": "Deleted sign 'TestGestureUnique123' and removed 5 samples from database.",
+    "timestamp": "2026-11-01T03:22:55.057271",
+    "category": "system"
+  },
+  {
+    "id": "act-281055",
+    "action": "Gesture Taught",
+    "description": "User taught gesture 'TestGestureUnique123' with 5 sample variations in ISL.",
+    "timestamp": "2026-11-01T03:22:54.826468",
+    "category": "system"
+  },
+  {
+    "id": "act-f3c269",
     "action": "Sample Captured",
-    "description": "Logged sample smp-af874a27 for 'Which' [VAL]. Status: approved",
-    "timestamp": "2026-10-31T12:06:56.661554",
+    "description": "Logged sample smp-f27b7976 for 'TestGestureUnique123' [TEST]. Status: approved",
+    "timestamp": "2026-11-01T03:22:54.811428",
     "category": "capture"
   },
   {
-    "id": "act-469816",
+    "id": "act-21dc17",
     "action": "Sample Captured",
-    "description": "Logged sample smp-96b8e58b for 'Which' [VAL]. Status: approved",
-    "timestamp": "2026-10-31T12:06:56.525786",
+    "description": "Logged sample smp-444cfd66 for 'TestGestureUnique123' [TRAIN]. Status: approved",
+    "timestamp": "2026-11-01T03:22:54.600519",
     "category": "capture"
   },
   {
-    "id": "act-0a1832",
+    "id": "act-5cf0c4",
     "action": "Sample Captured",
-    "description": "Logged sample smp-7e0c2ad4 for 'Which' [VAL]. Status: approved",
-    "timestamp": "2026-10-31T12:06:56.387245",
+    "description": "Logged sample smp-0aa0840f for 'TestGestureUnique123' [TRAIN]. Status: approved",
+    "timestamp": "2026-11-01T03:22:54.387996",
     "category": "capture"
   },
   {
-    "id": "act-ee5a9a",
+    "id": "act-8221d2",
     "action": "Sample Captured",
-    "description": "Logged sample smp-47ae6952 for 'Which' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T12:06:56.245476",
+    "description": "Logged sample smp-b429c3fd for 'TestGestureUnique123' [TRAIN]. Status: approved",
+    "timestamp": "2026-11-01T03:22:54.169695",
     "category": "capture"
   },
   {
-    "id": "act-d32361",
+    "id": "act-50eedd",
     "action": "Sample Captured",
-    "description": "Logged sample smp-0f09337e for 'Which' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T12:06:56.110141",
+    "description": "Logged sample smp-bda5d146 for 'TestGestureUnique123' [TRAIN]. Status: approved",
+    "timestamp": "2026-11-01T03:22:53.951875",
     "category": "capture"
   },
   {
-    "id": "act-09119a",
+    "id": "act-90cf72",
+    "action": "Class Created",
+    "description": "Added new sign label 'TestGestureUnique123' in category 'Taught'",
+    "timestamp": "2026-11-01T03:22:53.733916",
+    "category": "class"
+  },
+  {
+    "id": "act-8def00",
+    "action": "Sample Deleted",
+    "description": "Removed sample smp-b25118e1 (TestGesture_Valid) from corpus.",
+    "timestamp": "2026-11-01T03:22:53.248957",
+    "category": "system"
+  },
+  {
+    "id": "act-0c931e",
     "action": "Sample Captured",
-    "description": "Logged sample smp-72590585 for 'Which' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T12:06:55.976861",
+    "description": "Logged sample smp-b25118e1 for 'TestGesture_Valid' [TEST]. Status: approved",
+    "timestamp": "2026-11-01T03:22:53.005492",
     "category": "capture"
   },
   {
-    "id": "act-049d67",
+    "id": "act-f4b199",
+    "action": "Class Deleted",
+    "description": "Sign class 'TestSignGesture_A' deleted along with 0 samples.",
+    "timestamp": "2026-11-01T03:22:50.012680",
+    "category": "system"
+  },
+  {
+    "id": "act-7486da",
+    "action": "Class Created",
+    "description": "Added new sign label 'TestSignGesture_A' in category 'Testing'",
+    "timestamp": "2026-11-01T03:22:49.769262",
+    "category": "class"
+  },
+  {
+    "id": "act-189189",
+    "action": "Sample Deleted",
+    "description": "Removed sample smp-81a5c6c3 (TestGesture_Valid) from corpus.",
+    "timestamp": "2026-11-01T03:21:16.543246",
+    "category": "system"
+  },
+  {
+    "id": "act-806548",
     "action": "Sample Captured",
-    "description": "Logged sample smp-f8c4e755 for 'Which' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T12:06:55.841053",
+    "description": "Logged sample smp-81a5c6c3 for 'TestGesture_Valid' [TEST]. Status: approved",
+    "timestamp": "2026-11-01T03:21:16.290232",
     "category": "capture"
   },
   {
-    "id": "act-a096c2",
+    "id": "act-a98a7c",
+    "action": "Class Deleted",
+    "description": "Sign class 'TestSignGesture_A' deleted along with 0 samples.",
+    "timestamp": "2026-11-01T03:21:12.933873",
+    "category": "system"
+  },
+  {
+    "id": "act-ad7bae",
+    "action": "Class Created",
+    "description": "Added new sign label 'TestSignGesture_A' in category 'Testing'",
+    "timestamp": "2026-11-01T03:21:12.683105",
+    "category": "class"
+  },
+  {
+    "id": "act-631c47",
+    "action": "Sample Deleted",
+    "description": "Removed sample smp-3bcae9c3 (TestGesture_Valid) from corpus.",
+    "timestamp": "2026-11-01T01:43:54.511001",
+    "category": "system"
+  },
+  {
+    "id": "act-e2e6f9",
     "action": "Sample Captured",
-    "description": "Logged sample smp-52310287 for 'Which' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T12:06:55.704438",
+    "description": "Logged sample smp-3bcae9c3 for 'TestGesture_Valid' [TEST]. Status: approved",
+    "timestamp": "2026-11-01T01:43:54.093687",
     "category": "capture"
   },
   {
-    "id": "act-b2cb28",
+    "id": "act-ebc4de",
+    "action": "Class Deleted",
+    "description": "Sign class 'TestSignGesture_A' deleted from vocabulary.",
+    "timestamp": "2026-11-01T01:43:53.848728",
+    "category": "system"
+  },
+  {
+    "id": "act-8c9525",
+    "action": "Class Created",
+    "description": "Added new sign label 'TestSignGesture_A' in category 'Testing'",
+    "timestamp": "2026-11-01T01:43:53.804928",
+    "category": "class"
+  },
+  {
+    "id": "act-a8cf44",
+    "action": "Sample Deleted",
+    "description": "Removed sample smp-0cd9c595 (TestGesture_Valid) from corpus.",
+    "timestamp": "2026-11-01T01:27:37.950432",
+    "category": "system"
+  },
+  {
+    "id": "act-26b6dc",
     "action": "Sample Captured",
-    "description": "Logged sample smp-62f0a1b9 for 'Which' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T12:06:55.576603",
+    "description": "Logged sample smp-0cd9c595 for 'TestGesture_Valid' [TEST]. Status: approved",
+    "timestamp": "2026-11-01T01:27:37.538654",
     "category": "capture"
   },
   {
-    "id": "act-0924de",
+    "id": "act-62e2c5",
+    "action": "Class Deleted",
+    "description": "Sign class 'TestSignGesture_A' deleted from vocabulary.",
+    "timestamp": "2026-11-01T01:27:37.294218",
+    "category": "system"
+  },
+  {
+    "id": "act-63ced6",
+    "action": "Class Created",
+    "description": "Added new sign label 'TestSignGesture_A' in category 'Testing'",
+    "timestamp": "2026-11-01T01:27:37.260563",
+    "category": "class"
+  },
+  {
+    "id": "act-80ef06",
+    "action": "Sample Deleted",
+    "description": "Removed sample smp-d4f130a5 (TestGesture_Valid) from corpus.",
+    "timestamp": "2026-11-01T01:11:51.905578",
+    "category": "system"
+  },
+  {
+    "id": "act-355369",
     "action": "Sample Captured",
-    "description": "Logged sample smp-9df495c1 for 'Which' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T12:06:55.449425",
+    "description": "Logged sample smp-d4f130a5 for 'TestGesture_Valid' [TEST]. Status: approved",
+    "timestamp": "2026-11-01T01:11:51.589166",
     "category": "capture"
   },
   {
-    "id": "act-b3ab84",
+    "id": "act-849163",
+    "action": "Class Deleted",
+    "description": "Sign class 'TestSignGesture_A' deleted from vocabulary.",
+    "timestamp": "2026-11-01T01:11:51.419259",
+    "category": "system"
+  },
+  {
+    "id": "act-a930f6",
+    "action": "Class Created",
+    "description": "Added new sign label 'TestSignGesture_A' in category 'Testing'",
+    "timestamp": "2026-11-01T01:11:51.370413",
+    "category": "class"
+  },
+  {
+    "id": "act-5229c7",
+    "action": "Sample Deleted",
+    "description": "Removed sample smp-49ccdd59 (TestGesture_Valid) from corpus.",
+    "timestamp": "2026-11-01T01:09:00.391843",
+    "category": "system"
+  },
+  {
+    "id": "act-8eee65",
     "action": "Sample Captured",
-    "description": "Logged sample smp-cf4143b5 for 'Which' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T12:06:55.320860",
+    "description": "Logged sample smp-49ccdd59 for 'TestGesture_Valid' [TEST]. Status: approved",
+    "timestamp": "2026-11-01T01:09:00.067318",
     "category": "capture"
   },
   {
-    "id": "act-2798a6",
+    "id": "act-c4af1c",
+    "action": "Class Deleted",
+    "description": "Sign class 'TestSignGesture_A' deleted from vocabulary.",
+    "timestamp": "2026-11-01T01:08:59.878336",
+    "category": "system"
+  },
+  {
+    "id": "act-f6ad71",
+    "action": "Class Created",
+    "description": "Added new sign label 'TestSignGesture_A' in category 'Testing'",
+    "timestamp": "2026-11-01T01:08:59.840667",
+    "category": "class"
+  },
+  {
+    "id": "act-b8d1f5",
+    "action": "Sample Deleted",
+    "description": "Removed sample smp-4116451c (TestGesture_Valid) from corpus.",
+    "timestamp": "2026-10-31T20:02:24.242959",
+    "category": "system"
+  },
+  {
+    "id": "act-9fb017",
     "action": "Sample Captured",
-    "description": "Logged sample smp-f9fcc501 for 'Which' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T12:06:55.185967",
+    "description": "Logged sample smp-4116451c for 'TestGesture_Valid' [TEST]. Status: approved",
+    "timestamp": "2026-10-31T20:02:23.935784",
     "category": "capture"
   },
   {
-    "id": "act-9d7c54",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-d7877023 for 'Which' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T12:06:55.052302",
-    "category": "capture"
+    "id": "act-fda78e",
+    "action": "Class Deleted",
+    "description": "Sign class 'TestSignGesture_A' deleted from vocabulary.",
+    "timestamp": "2026-10-31T20:02:23.778886",
+    "category": "system"
   },
   {
-    "id": "act-eed750",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-54c777b1 for 'Which' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T12:06:54.919274",
-    "category": "capture"
+    "id": "act-6c6bff",
+    "action": "Class Created",
+    "description": "Added new sign label 'TestSignGesture_A' in category 'Testing'",
+    "timestamp": "2026-10-31T20:02:23.746568",
+    "category": "class"
   },
   {
-    "id": "act-b404b6",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-fd5ca5ba for 'Which' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T12:06:54.773050",
-    "category": "capture"
+    "id": "act-f7f9d8",
+    "action": "Sample Deleted",
+    "description": "Removed sample smp-6747b2a7 (TestGesture_Valid) from corpus.",
+    "timestamp": "2026-10-31T19:57:44.764681",
+    "category": "system"
   },
   {
-    "id": "act-87184c",
+    "id": "act-ed7f4c",
     "action": "Sample Captured",
-    "description": "Logged sample smp-318cb98e for 'Who' [VAL]. Status: approved",
-    "timestamp": "2026-10-31T12:06:54.637774",
-    "category": "capture"
-  },
-  {
-    "id": "act-b3015e",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-9a52354f for 'Who' [VAL]. Status: approved",
-    "timestamp": "2026-10-31T12:06:54.505460",
-    "category": "capture"
-  },
-  {
-    "id": "act-3129a0",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-39fb8bf8 for 'Who' [VAL]. Status: approved",
-    "timestamp": "2026-10-31T12:06:54.370228",
-    "category": "capture"
-  },
-  {
-    "id": "act-00f129",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-f83f7c9d for 'Who' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T12:06:54.236719",
-    "category": "capture"
-  },
-  {
-    "id": "act-3b6626",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-fe04176f for 'Who' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T12:06:54.104465",
-    "category": "capture"
-  },
-  {
-    "id": "act-7cca62",
-    "action": "Sample Captured",
-    "description": "Logged sample smp-0cf6610e for 'Who' [TRAIN]. Status: approved",
-    "timestamp": "2026-10-31T12:06:53.976816",
+    "description": "Logged sample smp-6747b2a7 for 'TestGesture_Valid' [TEST]. Status: approved",
+    "timestamp": "2026-10-31T19:57:44.464667",
     "category": "capture"
   }
 ]

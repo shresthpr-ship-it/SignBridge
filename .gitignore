@@ -37,3 +37,8 @@ yarn-error.log*
 .env.local
 .DS_Store
 Thumbs.db
+
+# Runtime uploaded media & test artifacts
+backend/app/data/media/images/ext-img-*
+backend/app/data/media/videos/sentence_mode/*
+!backend/app/data/media/videos/sentence_mode/.gitkeep

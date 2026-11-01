@@ -1,5 +1,19 @@
 [
   {
+    "id": "med-a271ca0f",
+    "media_type": "image",
+    "sign_language": "ISL",
+    "sign_label": "Nahi (No)",
+    "description": "left hand thumb down",
+    "signer_id": "signer_wc47",
+    "consent_confirmed": true,
+    "filename": "med-a271ca0f.png",
+    "file_url": "/media/images/med-a271ca0f.png",
+    "file_size_bytes": 1164903,
+    "split": "train",
+    "created_at": "2026-10-31T19:51:43.510040"
+  },
+  {
     "id": "med-d2f1d761",
     "media_type": "image",
     "sign_language": "ASL",
