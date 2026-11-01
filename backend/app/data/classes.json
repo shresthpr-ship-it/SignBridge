@@ -5,7 +5,8 @@
     "category": "Greetings",
     "description": "Open hand waving or steady palm facing forward.",
     "sample_count": 20,
-    "created_at": "2026-10-30T19:03:30.901844"
+    "created_at": "2026-10-30T19:03:30.901844",
+    "language": "ISL"
   },
   {
     "id": "cls-thanks",
@@ -13,7 +14,8 @@
     "category": "Greetings",
     "description": "Flat hand moving forward from chin or mouth.",
     "sample_count": 12,
-    "created_at": "2026-10-30T19:03:30.901865"
+    "created_at": "2026-10-30T19:03:30.901865",
+    "language": "ISL"
   },
   {
     "id": "cls-yes",
@@ -21,7 +23,8 @@
     "category": "Responses",
     "description": "Upward thumb gesture or nodding fist.",
     "sample_count": 22,
-    "created_at": "2026-10-30T19:03:30.901869"
+    "created_at": "2026-10-30T19:03:30.901869",
+    "language": "ISL"
   },
   {
     "id": "cls-no",
@@ -29,7 +32,8 @@
     "category": "Responses",
     "description": "Fist or index and middle snapping to thumb.",
     "sample_count": 22,
-    "created_at": "2026-10-30T19:03:30.901873"
+    "created_at": "2026-10-30T19:03:30.901873",
+    "language": "ISL"
   },
   {
     "id": "cls-peace",
@@ -37,7 +41,8 @@
     "category": "Conversational",
     "description": "Index and middle fingers forming a clear V sign.",
     "sample_count": 20,
-    "created_at": "2026-10-30T19:03:30.901877"
+    "created_at": "2026-10-30T19:03:30.901877",
+    "language": "ISL"
   },
   {
     "id": "cls-ily",
@@ -45,7 +50,8 @@
     "category": "Conversational",
     "description": "Thumb, index, and pinky extended upward.",
     "sample_count": 20,
-    "created_at": "2026-10-30T19:03:30.901881"
+    "created_at": "2026-10-30T19:03:30.901881",
+    "language": "ISL"
   },
   {
     "id": "cls-help",
@@ -53,7 +59,8 @@
     "category": "Emergency",
     "description": "Thumbs-up resting atop flat open palm.",
     "sample_count": 22,
-    "created_at": "2026-10-30T19:03:30.901937"
+    "created_at": "2026-10-30T19:03:30.901937",
+    "language": "ISL"
   },
   {
     "id": "cls-water",
@@ -61,7 +68,8 @@
     "category": "Essentials",
     "description": "W-handshape tapped near mouth.",
     "sample_count": 1,
-    "created_at": "2026-10-30T19:03:30.901941"
+    "created_at": "2026-10-30T19:03:30.901941",
+    "language": "ISL"
   },
   {
     "id": "cls-d47efdad",
@@ -69,7 +77,8 @@
     "category": "General",
     "description": "",
     "sample_count": 0,
-    "created_at": "2026-10-31T08:21:10.602060"
+    "created_at": "2026-10-31T08:21:10.602060",
+    "language": "ISL"
   },
   {
     "id": "cls-20fb616d",
@@ -86,7 +95,7 @@
     "language": "ASL",
     "category": "Actions",
     "description": "Open palm extended vertically facing forward.",
-    "sample_count": 0,
+    "sample_count": 14,
     "created_at": "2026-10-31T08:47:15.937376+00:00"
   },
   {
@@ -131,7 +140,7 @@
     "language": "ISL",
     "category": "Responses",
     "description": "Negative fist shake or closed hand.",
-    "sample_count": 0,
+    "sample_count": 1,
     "created_at": "2026-10-31T08:47:15.937397+00:00"
   },
   {
@@ -194,7 +203,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T08:50:17.017548"
+    "created_at": "2026-10-31T08:50:17.017548",
+    "language": "ISL"
   },
   {
     "id": "cls-c61bd8bd",
@@ -202,7 +212,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T09:00:35.442204"
+    "created_at": "2026-10-31T09:00:35.442204",
+    "language": "ISL"
   },
   {
     "id": "cls-214c21dc",
@@ -210,7 +221,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T09:09:10.006951"
+    "created_at": "2026-10-31T09:09:10.006951",
+    "language": "ISL"
   },
   {
     "id": "cls-0a80bee1",
@@ -218,7 +230,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T09:09:35.599473"
+    "created_at": "2026-10-31T09:09:35.599473",
+    "language": "ISL"
   },
   {
     "id": "cls-d7040022",
@@ -226,7 +239,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T09:10:19.606659"
+    "created_at": "2026-10-31T09:10:19.606659",
+    "language": "ISL"
   },
   {
     "id": "cls-8cd64f9d",
@@ -234,7 +248,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T09:11:00.198908"
+    "created_at": "2026-10-31T09:11:00.198908",
+    "language": "ISL"
   },
   {
     "id": "cls-27af5499",
@@ -242,7 +257,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 16,
-    "created_at": "2026-10-31T09:12:26.496490"
+    "created_at": "2026-10-31T09:12:26.496490",
+    "language": "ISL"
   },
   {
     "id": "cls-b32ccd0c",
@@ -250,7 +266,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T09:13:33.540545"
+    "created_at": "2026-10-31T09:13:33.540545",
+    "language": "ISL"
   },
   {
     "id": "cls-e759ac9b",
@@ -258,7 +275,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 16,
-    "created_at": "2026-10-31T09:14:08.900231"
+    "created_at": "2026-10-31T09:14:08.900231",
+    "language": "ISL"
   },
   {
     "id": "cls-ce9986f6",
@@ -266,7 +284,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 16,
-    "created_at": "2026-10-31T09:17:02.492446"
+    "created_at": "2026-10-31T09:17:02.492446",
+    "language": "ISL"
   },
   {
     "id": "cls-11bf7dd6",
@@ -274,7 +293,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T10:11:25.294691"
+    "created_at": "2026-10-31T10:11:25.294691",
+    "language": "ISL"
   },
   {
     "id": "cls-5aae582d",
@@ -282,7 +302,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T10:13:27.828744"
+    "created_at": "2026-10-31T10:13:27.828744",
+    "language": "ISL"
   },
   {
     "id": "cls-0f7d0c82",
@@ -290,7 +311,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T10:13:41.632041"
+    "created_at": "2026-10-31T10:13:41.632041",
+    "language": "ISL"
   },
   {
     "id": "cls-a3ebcaa6",
@@ -298,7 +320,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T10:14:03.971016"
+    "created_at": "2026-10-31T10:14:03.971016",
+    "language": "ISL"
   },
   {
     "id": "cls-a42a34ff",
@@ -306,7 +329,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T10:14:28.355878"
+    "created_at": "2026-10-31T10:14:28.355878",
+    "language": "ISL"
   },
   {
     "id": "cls-680d8e30",
@@ -314,7 +338,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T10:14:53.644304"
+    "created_at": "2026-10-31T10:14:53.644304",
+    "language": "ISL"
   },
   {
     "id": "cls-1ca0106a",
@@ -322,7 +347,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T10:15:14.834535"
+    "created_at": "2026-10-31T10:15:14.834535",
+    "language": "ISL"
   },
   {
     "id": "cls-5a2bcb97",
@@ -330,7 +356,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T10:15:43.929511"
+    "created_at": "2026-10-31T10:15:43.929511",
+    "language": "ISL"
   },
   {
     "id": "cls-39f2bfea",
@@ -338,7 +365,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T10:16:25.284406"
+    "created_at": "2026-10-31T10:16:25.284406",
+    "language": "ISL"
   },
   {
     "id": "cls-befe0e37",
@@ -346,7 +374,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T10:16:56.064545"
+    "created_at": "2026-10-31T10:16:56.064545",
+    "language": "ISL"
   },
   {
     "id": "cls-84b17306",
@@ -354,7 +383,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T10:17:15.719623"
+    "created_at": "2026-10-31T10:17:15.719623",
+    "language": "ISL"
   },
   {
     "id": "cls-60494fbe",
@@ -362,7 +392,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T10:17:47.935135"
+    "created_at": "2026-10-31T10:17:47.935135",
+    "language": "ISL"
   },
   {
     "id": "cls-fb9de081",
@@ -370,7 +401,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T10:18:34.242662"
+    "created_at": "2026-10-31T10:18:34.242662",
+    "language": "ISL"
   },
   {
     "id": "cls-119b2098",
@@ -378,7 +410,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T10:18:52.217919"
+    "created_at": "2026-10-31T10:18:52.217919",
+    "language": "ISL"
   },
   {
     "id": "cls-5b658d5c",
@@ -386,7 +419,8 @@
     "category": "Taught",
     "description": "Taught gesture for ASL",
     "sample_count": 8,
-    "created_at": "2026-10-31T10:19:22.577949"
+    "created_at": "2026-10-31T10:19:22.577949",
+    "language": "ISL"
   },
   {
     "id": "cls-4fac7bf3",
@@ -394,7 +428,8 @@
     "category": "Essentials",
     "description": "Curved C-handshape mimicking holding a cup.",
     "sample_count": 15,
-    "created_at": "2026-10-31T12:06:40.931691"
+    "created_at": "2026-10-31T12:06:40.931691",
+    "language": "ISL"
   },
   {
     "id": "cls-176053a7",
@@ -402,7 +437,8 @@
     "category": "Essentials",
     "description": "All 5 fingertips pinched together pointing toward mouth.",
     "sample_count": 15,
-    "created_at": "2026-10-31T12:06:40.964799"
+    "created_at": "2026-10-31T12:06:40.964799",
+    "language": "ISL"
   },
   {
     "id": "cls-302c87d6",
@@ -410,7 +446,8 @@
     "category": "Conversational",
     "description": "Index finger extended from under the chin/mouth pointing outward.",
     "sample_count": 15,
-    "created_at": "2026-10-31T12:06:40.995412"
+    "created_at": "2026-10-31T12:06:40.995412",
+    "language": "ISL"
   },
   {
     "id": "cls-7449715d",
@@ -418,7 +455,8 @@
     "category": "Questions",
     "description": "Open palms facing forward/up with fingers spread wide.",
     "sample_count": 15,
-    "created_at": "2026-10-31T12:06:41.028499"
+    "created_at": "2026-10-31T12:06:41.028499",
+    "language": "ISL"
   },
   {
     "id": "cls-35dc45de",
@@ -426,7 +464,8 @@
     "category": "Questions",
     "description": "Index finger pointed upward waving side to side.",
     "sample_count": 15,
-    "created_at": "2026-10-31T12:06:41.056607"
+    "created_at": "2026-10-31T12:06:41.056607",
+    "language": "ISL"
   },
   {
     "id": "cls-da24cda3",
@@ -434,7 +473,8 @@
     "category": "Questions",
     "description": "Y-handshape with thumb and pinky extended, middle 3 curled.",
     "sample_count": 15,
-    "created_at": "2026-10-31T12:06:41.087561"
+    "created_at": "2026-10-31T12:06:41.087561",
+    "language": "ISL"
   },
   {
     "id": "cls-26b33ee3",
@@ -442,7 +482,8 @@
     "category": "Questions",
     "description": "L-handshape with thumb and index finger extended at 90 degrees.",
     "sample_count": 15,
-    "created_at": "2026-10-31T12:06:41.120461"
+    "created_at": "2026-10-31T12:06:41.120461",
+    "language": "ISL"
   },
   {
     "id": "cls-8cfc56bd",
@@ -450,6 +491,367 @@
     "category": "Questions",
     "description": "A-handshape fist with thumb pointing upright.",
     "sample_count": 15,
-    "created_at": "2026-10-31T12:06:41.150705"
+    "created_at": "2026-10-31T12:06:41.150705",
+    "language": "ISL"
+  },
+  {
+    "id": "cls-82191f67",
+    "name": "1",
+    "category": "Taught",
+    "description": "Taught gesture for ASL",
+    "sample_count": 8,
+    "created_at": "2026-10-31T15:47:08.488793",
+    "language": "ISL"
+  },
+  {
+    "id": "cls-isl-please",
+    "name": "Please",
+    "language": "ISL",
+    "category": "Greetings",
+    "description": "Open palm rubbed on chest in circle",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.123Z"
+  },
+  {
+    "id": "cls-isl-sorry",
+    "name": "Sorry",
+    "language": "ISL",
+    "category": "Greetings",
+    "description": "Closed fist rubbed on chest with remorse",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.125Z"
+  },
+  {
+    "id": "cls-isl-welcome",
+    "name": "Welcome",
+    "language": "ISL",
+    "category": "Greetings",
+    "description": "Both hands sweeping inward with open palms",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.126Z"
+  },
+  {
+    "id": "cls-isl-good-morning",
+    "name": "Good Morning",
+    "language": "ISL",
+    "category": "Greetings",
+    "description": "Sign Good then morning sunrise",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.127Z"
+  },
+  {
+    "id": "cls-isl-good-night",
+    "name": "Good Night",
+    "language": "ISL",
+    "category": "Greetings",
+    "description": "Sign Good then night sunset",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.127Z"
+  },
+  {
+    "id": "cls-isl-how",
+    "name": "How",
+    "language": "ISL",
+    "category": "Questions",
+    "description": "Palms rotated upward questioning",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.127Z"
+  },
+  {
+    "id": "cls-isl-when",
+    "name": "When",
+    "language": "ISL",
+    "category": "Questions",
+    "description": "Clockwise circle around index finger",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.128Z"
+  },
+  {
+    "id": "cls-isl-sleep",
+    "name": "Sleep",
+    "language": "ISL",
+    "category": "Daily Needs",
+    "description": "Tilted cheek resting against flat hand",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.128Z"
+  },
+  {
+    "id": "cls-isl-go",
+    "name": "Go",
+    "language": "ISL",
+    "category": "Daily Needs",
+    "description": "Index pointing and swinging forward",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.129Z"
+  },
+  {
+    "id": "cls-isl-come",
+    "name": "Come",
+    "language": "ISL",
+    "category": "Daily Needs",
+    "description": "Curled fingers beckoning toward signer",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.129Z"
+  },
+  {
+    "id": "cls-isl-work",
+    "name": "Work",
+    "language": "ISL",
+    "category": "Daily Needs",
+    "description": "Fist tapping on wrist",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.129Z"
+  },
+  {
+    "id": "cls-isl-study",
+    "name": "Study",
+    "language": "ISL",
+    "category": "Daily Needs",
+    "description": "Open palm book and flicking fingers",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.130Z"
+  },
+  {
+    "id": "cls-isl-good",
+    "name": "Good",
+    "language": "ISL",
+    "category": "Responses",
+    "description": "Thumbs up or flat hand at chin moving forward",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.130Z"
+  },
+  {
+    "id": "cls-isl-bad",
+    "name": "Bad",
+    "language": "ISL",
+    "category": "Responses",
+    "description": "Hand flipping downward from chin",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.130Z"
+  },
+  {
+    "id": "cls-isl-happy",
+    "name": "Happy",
+    "language": "ISL",
+    "category": "Emotions",
+    "description": "Open hands fluttering on chest",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.130Z"
+  },
+  {
+    "id": "cls-isl-sad",
+    "name": "Sad",
+    "language": "ISL",
+    "category": "Emotions",
+    "description": "Clawed hand moving slowly down face",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.130Z"
+  },
+  {
+    "id": "cls-isl-mother",
+    "name": "Mother",
+    "language": "ISL",
+    "category": "People",
+    "description": "Finger tapping side of nose or chin",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.131Z"
+  },
+  {
+    "id": "cls-isl-father",
+    "name": "Father",
+    "language": "ISL",
+    "category": "People",
+    "description": "Twirling fingers at upper lip or forehead",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.131Z"
+  },
+  {
+    "id": "cls-isl-friend",
+    "name": "Friend",
+    "language": "ISL",
+    "category": "People",
+    "description": "Interlocking index fingers",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.131Z"
+  },
+  {
+    "id": "cls-isl-family",
+    "name": "Family",
+    "language": "ISL",
+    "category": "People",
+    "description": "Circular arc connecting household",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.131Z"
+  },
+  {
+    "id": "cls-isl-teacher",
+    "name": "Teacher",
+    "language": "ISL",
+    "category": "People",
+    "description": "Knowledge coming from temples",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.132Z"
+  },
+  {
+    "id": "cls-isl-doctor",
+    "name": "Doctor",
+    "language": "ISL",
+    "category": "People",
+    "description": "Checking wrist pulse",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.132Z"
+  },
+  {
+    "id": "cls-isl-today",
+    "name": "Today",
+    "language": "ISL",
+    "category": "Time",
+    "description": "Both open hands moving down firmly",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.132Z"
+  },
+  {
+    "id": "cls-isl-tomorrow",
+    "name": "Tomorrow",
+    "language": "ISL",
+    "category": "Time",
+    "description": "Thumb rolling forward from cheek",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.132Z"
+  },
+  {
+    "id": "cls-isl-yesterday",
+    "name": "Yesterday",
+    "language": "ISL",
+    "category": "Time",
+    "description": "Thumb rolling backward over shoulder",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.133Z"
+  },
+  {
+    "id": "cls-isl-time",
+    "name": "Time",
+    "language": "ISL",
+    "category": "Time",
+    "description": "Index tapping on wrist watch",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.133Z"
+  },
+  {
+    "id": "cls-isl-2",
+    "name": "2",
+    "language": "ISL",
+    "category": "Numbers",
+    "description": "Index and middle extended in V",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.133Z"
+  },
+  {
+    "id": "cls-isl-3",
+    "name": "3",
+    "language": "ISL",
+    "category": "Numbers",
+    "description": "Thumb, index, middle extended",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.134Z"
+  },
+  {
+    "id": "cls-isl-4",
+    "name": "4",
+    "language": "ISL",
+    "category": "Numbers",
+    "description": "Four fingers extended, thumb folded",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.134Z"
+  },
+  {
+    "id": "cls-isl-5",
+    "name": "5",
+    "language": "ISL",
+    "category": "Numbers",
+    "description": "Five fingers open wide",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.135Z"
+  },
+  {
+    "id": "cls-isl-6",
+    "name": "6",
+    "language": "ISL",
+    "category": "Numbers",
+    "description": "5 on base palm + 1",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.135Z"
+  },
+  {
+    "id": "cls-isl-7",
+    "name": "7",
+    "language": "ISL",
+    "category": "Numbers",
+    "description": "5 on base palm + 2",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.136Z"
+  },
+  {
+    "id": "cls-isl-8",
+    "name": "8",
+    "language": "ISL",
+    "category": "Numbers",
+    "description": "5 on base palm + 3",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.136Z"
+  },
+  {
+    "id": "cls-isl-9",
+    "name": "9",
+    "language": "ISL",
+    "category": "Numbers",
+    "description": "5 on base palm + 4",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.136Z"
+  },
+  {
+    "id": "cls-isl-10",
+    "name": "10",
+    "language": "ISL",
+    "category": "Numbers",
+    "description": "Both hands showing 10 fingers pushed forward",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.136Z"
+  },
+  {
+    "id": "cls-isl-w",
+    "name": "W",
+    "language": "ISL",
+    "category": "Alphabet",
+    "description": "Index, middle, ring extended in W",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.137Z"
+  },
+  {
+    "id": "cls-isl-x",
+    "name": "X",
+    "language": "ISL",
+    "category": "Alphabet",
+    "description": "Index hooked / crossed",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.137Z"
+  },
+  {
+    "id": "cls-isl-y",
+    "name": "Y",
+    "language": "ISL",
+    "category": "Alphabet",
+    "description": "Thumb and pinky extended",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.137Z"
+  },
+  {
+    "id": "cls-isl-z",
+    "name": "Z",
+    "language": "ISL",
+    "category": "Alphabet",
+    "description": "Index tracing Z in air",
+    "sample_count": 14,
+    "created_at": "2026-11-01T01:24:02.137Z"
   }
 ]

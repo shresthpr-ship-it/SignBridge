@@ -4,6 +4,7 @@ import { Shell } from './components/layout/Shell';
 import { OverviewView } from './components/views/OverviewView';
 import { RecognitionView } from './components/views/RecognitionView';
 import { SentenceModeView } from './components/views/SentenceModeView';
+import { TutorialView } from './components/views/TutorialView';
 import { StudioView } from './components/views/StudioView';
 import { VideoProcessingView } from './components/views/VideoProcessingView';
 import { DatasetView } from './components/views/DatasetView';
@@ -55,6 +56,7 @@ const MainContent: React.FC = () => {
       {activeTab === 'overview' && <OverviewView />}
       {activeTab === 'recognition' && <RecognitionView />}
       {activeTab === 'sentence-mode' && <SentenceModeView />}
+      {activeTab === 'tutorial' && <TutorialView />}
       {activeTab === 'studio' && <StudioView />}
       {activeTab === 'video' && <VideoProcessingView />}
       {activeTab === 'dataset' && <DatasetView />}
@@ -69,6 +71,16 @@ const MainContent: React.FC = () => {
 };
 
 export const App: React.FC = () => {
+  const isTutorialWindow = window.location.search.includes('window=tutorial');
+
+  if (isTutorialWindow) {
+    return (
+      <AppProvider>
+        <TutorialView isPopout={true} />
+      </AppProvider>
+    );
+  }
+
   return (
     <AppProvider>
       <Shell>

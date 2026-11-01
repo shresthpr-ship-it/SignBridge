@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Globe, Camera, Lock } from 'lucide-react';
+import { User, Globe, Camera, Lock, BookOpen, ExternalLink } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { StatusIndicator } from '../ui/StatusIndicator';
 import { ActiveTab } from '../../types';
@@ -31,6 +31,10 @@ const PAGE_METADATA: Record<ActiveTab, PageMeta> = {
   'sentence-mode': {
     title: 'Sentence Mode',
     description: 'Record complete sign-language messages, translate to sentence text, edit, and listen.',
+  },
+  tutorial: {
+    title: 'ISL Sign Tutorial',
+    description: 'Visual dictionary, execution guides, and interactive camera practice for Indian Sign Language.',
   },
   studio: {
     title: 'Capture Studio',
@@ -106,6 +110,20 @@ export const AppHeader: React.FC = () => {
             ))}
           </select>
         </div>
+
+        {/* Quick Popout Tutorial Window Button */}
+        <button
+          type="button"
+          onClick={() => {
+            window.open('/?window=tutorial', 'ISL_Tutorial_Window', 'width=1200,height=840,resizable=yes,scrollbars=yes');
+          }}
+          className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 shadow-2xs transition-colors cursor-pointer"
+          title="Open ISL sign tutorial in a separate companion window"
+        >
+          <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
+          <span>Tutorial Window</span>
+          <ExternalLink className="w-3 h-3 text-indigo-400" />
+        </button>
 
         {/* Camera Permission / Context Badge */}
         <div className="flex items-center pl-2 border-l border-slate-200">

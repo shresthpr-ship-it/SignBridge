@@ -13,6 +13,7 @@ import {
   Tag,
   Brain,
   Download,
+  BookOpen,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ActiveTab } from '../../types';
@@ -44,6 +45,13 @@ export const AppSidebar: React.FC = () => {
       label: 'Sentence Mode',
       icon: <Film className="w-4 h-4" />,
       badge: 'NEW',
+      badgeVariant: 'indigo',
+    },
+    {
+      id: 'tutorial',
+      label: 'ISL Sign Tutorial',
+      icon: <BookOpen className="w-4 h-4" />,
+      badge: 'GUIDE',
       badgeVariant: 'indigo',
     },
     {

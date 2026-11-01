@@ -150,6 +150,7 @@ export type ActiveTab =
   | 'overview'
   | 'recognition'
   | 'sentence-mode'
+  | 'tutorial'
   | 'studio'
   | 'video'
   | 'dataset'
